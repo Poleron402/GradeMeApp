@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "target": "ESNext",
+    "module": "NodeNext",
+    "skipLibCheck": true,
+    "strict": true,
+    "outDir": "../../dist-electron"
+  },
+  "include": ["main.ts", "preload.ts"]
+}
