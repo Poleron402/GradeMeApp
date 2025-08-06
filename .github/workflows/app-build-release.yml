@@ -1,0 +1,75 @@
+name: build
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release: 
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, macos-13]
+    
+
+    steps:
+      - name: Checkout the git repo
+        uses: actions/checkout@v2
+
+      - name: Install tools and dependencies
+        uses: actions/setup-node@v1
+        with:
+          node-version: 18
+          
+      - name: prepare-python
+        run: make install-py
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Transpile Electron (main process)
+        run: npm run transpile:electron
+
+      - name: Build React (renderer process)
+        run: npm run build
+
+      - name: Build and release GradeMe
+        uses: samuelmeuli/action-electron-builder@v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+  
+  release-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the git repo
+        uses: actions/checkout@v2
+      - name: Install tools and dependencies
+        uses: actions/setup-node@v1
+        with:
+          node-version: 18
+          
+      - name: prepare-python
+        run: make install-py
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Transpile Electron (main process)
+        run: npm run transpile:electron
+
+      - name: Build React (renderer process)
+        run: npm run build
+
+      - name: Build and release GradeMe
+        uses: samuelmeuli/action-electron-builder@v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+          args: --linux AppImage
+
+
+
+  
