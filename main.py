@@ -9,6 +9,7 @@ import subprocess
 import xml.etree.ElementTree as ET
 from datetime import datetime 
 from grademe import Submissions
+from ollama_code_analysis import analyze
 
 submission_folder_path = sys.argv[1]
 folder_path = sys.argv[2]
@@ -25,26 +26,42 @@ def check_for_invalid_class_java(file):
         return match.group().split(" ")[-1]+".java"
     else:
         return ""
+    
+
+def makehtml(results, file_name):
+    html_content = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Class gradesm for {file_name}</title>
+    <link rel="stylesheet" href="styles/styles.css">
+</head>
+<body>
+    <h1>Class grades</h1>
+"""
+    with open("report.html", "w") as f:
+        f.write(html_content)
+        f.write(results)
+        f.write("""
+</body>
+</html>
+                """)
+
 
 def run_files(destination, files):
-
-    outcome_list = []
+    outcome = ''
     for i in os.listdir(files):
-        outcome = ''
-        student = {}
         full_path = os.path.join(files, i)
         
         student_files = os.listdir(full_path)
-        student["name"] = i
-
+        outcome += f"<br></br>Name: {i}"
         continue_flag = False
         for file in student_files:
             file_path = os.path.join(full_path, file)
             if file != check_for_invalid_class_java(file_path):
                 continue_flag = True
             else:
-                current_dir = os.getcwd()
-                student["file_path"] = os.path.join(current_dir, file_path)
+                
                 temp_path = f"{destination}/src/main/java/{file}"
                 if os.path.exists(temp_path):
                     shutil.copyfile(file_path, f"{destination}/src/main/java/{file}")
@@ -53,24 +70,19 @@ def run_files(destination, files):
 
         if continue_flag:
             outcome += "❌ Errors occured running stuident's submission. Check manually."
-            student["result"] = outcome
-            student["analysis"] = ""
-            student["result"] = outcome
-            outcome_list.append(student)
+            outcome += f"<br></br>Result: {outcome}"
             continue
-        current_dir = os.getcwd()
+
         try:
             subprocess.run(["./gradlew", "test"], cwd=destination, check=True, timeout=10, capture_output=True, text=True)
             
         except subprocess.TimeoutExpired as e:
             outcome += F"⏱️ Build timed out. Check manually."
-            student["result"] = outcome
-            continue
+            outcome += f"<br></br>Result: {outcome}"
         except subprocess.CalledProcessError as e:
             outcome += "❌ "
 
-        # analysis = analyze(f"{destination}/src/main/java/{file}")
-        # if result:
+        analysis = analyze(f"{destination}/src/main/java/{file}")
         results_path = os.path.join(destination, "build", "test-results", "test", "TEST-*.xml")
         result_files = glob.glob(results_path) # makes the TEST-*.xml work
         if result_files:
@@ -82,17 +94,13 @@ def run_files(destination, files):
             if "❌" in outcome:
                 if passed == all_tests:
                     outcome += "Something went wrong; Check manually"
-                else:
-                    outcome += f"{passed}/{all_tests}"
             else:
-                outcome += f"✅ {passed}/{all_tests}"
+                outcome += f"<br></br>Result: ✅ {passed}/{all_tests}"
+        
+        outcome += f"<br></br>Analysis: {analysis}"
 
-        student["analysis"] = ""
-        student["result"] = outcome
-        outcome_list.append(student)
-    
-    # makehtml(outcome_list, file)
-    return outcome_list
+    print(outcome)
+    makehtml(outcome, file)
 
 
 def run():
@@ -105,7 +113,7 @@ def run():
         
         # copy the submissions folder into local environment
         output_sub_dir = "submissions"
-        if os.path.exists(output_sub_dir):
+        if os.path.exists(f'{output_dir}/{output_sub_dir}'):
             shutil.rmtree(output_sub_dir)
         os.makedirs(output_sub_dir, exist_ok=True)
         shutil.copytree(submission_folder_path, output_sub_dir, dirs_exist_ok=True)
@@ -119,8 +127,5 @@ def run():
     return results
 
 
-
-data = run()
-results = sorted(data, key=lambda d: d["name"])
-print(json.dumps({"data": results}))
-sys.stdout.flush()
+if __name__ == "__main__":
+    run()
