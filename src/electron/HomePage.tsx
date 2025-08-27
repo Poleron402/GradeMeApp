@@ -19,7 +19,13 @@ const Home = () =>{
         setFolder2(filePath)
     }
   }
-
+  const saveSortedSubmissions = async() =>{
+    try{
+      await window.electronAPI.downloadFolder()
+    }catch (err){
+      alert(`Issues saving a folder ${err}`)
+    }
+  }
   const runScript = async()=>{
     setWaiting(true)
     try {
@@ -54,12 +60,14 @@ const Home = () =>{
                                                                                                     
       <div id="mainButtons">
         <div className='buttonAndLink'>
-          <button onClick={()=>openFolder("folder1") } className='selectButton'>Select Submissions Folder</button>
+          <button onClick={()=>{
+            openFolder("folder1")} } className='selectButton'>Select Submissions Folder</button>
             <div className="inLine">
               {folder1 && folder1.length > 0 && 
               <>
               <p>{folder1}</p>
-              <button className="deleteBtn" onClick={()=>setFolder1(undefined)}>X</button>
+              <button className="deleteBtn" onClick={()=>{
+                setFolder1(undefined)}}>X</button>
               </>} 
           </div>
         </div>
@@ -93,7 +101,7 @@ const Home = () =>{
         !waiting && data&&
         <>
         <button id="resButton" onClick={()=>setShowResults(true)}>Show Results</button>
-        <button title="Download a folder containing submissions sorted by student name" onClick={()=>setShowResults(true)}>Download Sorted</button>
+         <button title="Download a folder containing submissions sorted by student name" onClick={saveSortedSubmissions}>Download Sorted</button> 
         </>
       }
       {error&&

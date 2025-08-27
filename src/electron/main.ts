@@ -11,21 +11,30 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 app.on("ready", ()=> {
-    // const __scriptdirname = path.join(__dirname, '..', 'app-be')
+    let pythonPath = ""
+    let scriptPath = ""
+    let ollamaPath = ""
+    if (isDev()) {
+        const __scriptdirname = path.join(__dirname, '..', 'app-be')
+        pythonPath = isWindows
+        ? path.join(__scriptdirname, "venv", "Scripts", "python.exe")
+        : path.join(__scriptdirname, "venv", "bin", "python");
+        
+        scriptPath = path.join(__scriptdirname, "main.py")
+        ollamaPath = path.join(__scriptdirname, "ollama_code_analysis.py")
 
-    // const pythonPath = isWindows
-    // ? path.join(__dirname, "main.exe")
-    // : path.join(__dirname, "venv", "bin", "python");
-    const scriptPath = isWindows? path.join(process.resourcesPath, "main.exe") :path.join(process.resourcesPath, "main")
-    const ollamaPath = isWindows? path.join(process.resourcesPath, "ollama_code_analysis.exe") :path.join(process.resourcesPath, "ollama_code_analysis")
+    }else{
+        scriptPath = isWindows? path.join(process.resourcesPath, "main.exe") :path.join(process.resourcesPath, "main")
+        ollamaPath = isWindows? path.join(process.resourcesPath, "ollama_code_analysis.exe") :path.join(process.resourcesPath, "ollama_code_analysis")
+    }
 
     const mainWindow = new BrowserWindow({
         width: 1100,
         height: 800,
         webPreferences:{
             preload: path.join(__dirname, 'preload.js'),
-            contextIsolation: true,
             nodeIntegration: true,
+            contextIsolation: true,
         }
     })
     if (isDev()) {
@@ -39,12 +48,11 @@ app.on("ready", ()=> {
         const result = await dialog.showOpenDialog({
             properties: ['openDirectory'],
         });
-        console.log('here')
         return result.filePaths;
     })
 
     ipcMain.on('run-python', (event, {folder1, folder2})=>{
-        const python = spawn(scriptPath, [folder1 ?? "", folder2 ?? ""], {shell:false})
+        const python = isDev()? spawn( pythonPath, [scriptPath, folder1 ?? "", folder2 ?? ""]):spawn( scriptPath, [folder1 ?? "", folder2 ?? ""], {shell:false})
         let output = ''
         python.stdout.on("data", (result)=>{
             output += result.toString();
@@ -55,18 +63,18 @@ app.on("ready", ()=> {
         })
         python.on('close', () => {
         try {
-        const { data } = JSON.parse(output);
-        event.sender.send('python-result', data);
+            const { data } = JSON.parse(output);
+            event.sender.send('python-result', data);
         } catch (err) {
-        event.sender.send('python-error', `Failed to parse output: ${err}`);
+            event.sender.send('python-error', `Failed to parse output: ${err}`);
         }
     });
     })
 
     ipcMain.on('run-codellama', (event, {path, rubric})=>{
-        const python = spawn(ollamaPath, [path, rubric], {shell:false})
+        const python = isDev()? spawn(pythonPath, [ollamaPath, path, rubric]):spawn(ollamaPath, [path, rubric], {shell:false})
         let output = ''
-         python.stdout.on("data", (result)=>{
+        python.stdout.on("data", (result)=>{
             output += result.toString();
         })
 
@@ -82,6 +90,24 @@ app.on("ready", ()=> {
         }
         })
     })
+
+    ipcMain.handle("dialog:downloadFolder", async (event) =>{
+        const __subdirname = path.join(__dirname, '..', 'submissions')
+        const {canceled, filePaths} = await dialog.showOpenDialog({
+            title: "Save Submissions",
+            properties: ['openDirectory', 'createDirectory']
+        })
+        if (!canceled && filePaths){
+            try{
+                await fs.cp(__subdirname, `${filePaths[0]}/submissions-${Date.now()}`, {recursive: true}, (err)=>{
+                    if (err) throw err
+                })
+            }catch(err){
+                event.sender.send("Folder save error", `Failed to save folder ${err}`)
+            }
+        }
+        return filePaths[0]
+    })
 })
 
 
@@ -89,12 +115,10 @@ app.on("ready", ()=> {
 app.on('will-quit', async(e)=>{
     e.preventDefault()
     const __subdirname = path.join(__dirname, '..', 'submissions')
-    console.log(fs.existsSync(__subdirname))
     if (fs.existsSync(__subdirname) === true){
 
         await fs.rm(__subdirname, { recursive: true },  (err)=>{
             if (err) throw err
-            console.log("Deleted submissions file")
         })
     }   
 })

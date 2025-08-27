@@ -15,7 +15,7 @@ declare global {
       openFolder: () => Promise<string>;
       runScript: (folder1:string | undefined, folder2:string |undefined) => Promise<Results[]>;
       runOllama: (path:string, rubric:string) => Promise<string>;
-    
+      downloadFolder: () => Promise<string>;
     }
   }
 }

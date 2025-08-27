@@ -6,8 +6,6 @@ import re
 
 class Submissions:
     folder_path = os.getcwd()
-    folder_student_names = []
-
 
     def __init__(self, folder_name):
         self.folder_path = folder_name
