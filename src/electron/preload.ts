@@ -13,5 +13,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.once('codellama-error', (_event, error) => reject(new Error(error)));
 
       ipcRenderer.send('run-codellama', { path, rubric });
-    })
+    }),
+    downloadFolder: ()=>ipcRenderer.invoke('dialog:downloadFolder'),
 })
