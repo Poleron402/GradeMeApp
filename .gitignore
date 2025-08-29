@@ -1,3 +1,4 @@
 submissions/
 venv/
 __pycache__
+*.html

@@ -3,7 +3,7 @@ import sys
 import shutil
 import tempfile
 import glob
-import json
+import time
 import re
 import subprocess
 import xml.etree.ElementTree as ET
@@ -13,6 +13,9 @@ from ollama_code_analysis import analyze
 
 submission_folder_path = sys.argv[1]
 folder_path = sys.argv[2]
+language = sys.argv[3]
+build = sys.argv[4]
+is_sorted = sys.argv[5]
 
 def check_for_invalid_class_java(file):
     with open(file, 'r') as f:
@@ -47,10 +50,28 @@ def makehtml(results, file_name):
 </html>
                 """)
 
+def getXMLGradle(destination, outcome):
+    results_path = os.path.join(destination, "build", "test-results", "test", "TEST-*.xml")
+    result_files = glob.glob(results_path) # makes the TEST-*.xml work
+    if result_files:
+        xml_tree = ET.parse(result_files[0])
+        root = xml_tree.getroot()
+        all_tests = int(root.attrib.get('tests'))
+        failed = int(root.attrib.get('skipped'))+int(root.attrib.get('failures'))+int(root.attrib.get('errors'))
+        passed = all_tests-failed
+        if "❌" in outcome:
+            if passed == all_tests:
+                outcome += "Something went wrong; Check manually"
+            else:
+                outcome += f"{passed}/{all_tests}"
+        else:
+            outcome += f"✅ {passed}/{all_tests}"
+    return outcome
 
 def run_files(destination, files):
-    outcome = ''
+    outcome_html = ''
     for i in os.listdir(files):
+        outcome = ''
         full_path = os.path.join(files, i)
         
         student_files = os.listdir(full_path)
@@ -58,49 +79,53 @@ def run_files(destination, files):
         continue_flag = False
         for file in student_files:
             file_path = os.path.join(full_path, file)
+
             if file != check_for_invalid_class_java(file_path):
                 continue_flag = True
             else:
-                
                 temp_path = f"{destination}/src/main/java/{file}"
-                if os.path.exists(temp_path):
-                    shutil.copyfile(file_path, f"{destination}/src/main/java/{file}")
-                else:
-                    continue_flag = True
+                print(f"temp_path: {temp_path}")
 
+                shutil.copyfile(file_path, f"{destination}/src/main/java/{file}")
+                if not os.path.exists(temp_path):
+                    continue_flag = True
         if continue_flag:
             outcome += "❌ Errors occured running stuident's submission. Check manually."
             outcome += f"<br></br>Result: {outcome}"
             continue
 
         try:
-            subprocess.run(["./gradlew", "test"], cwd=destination, check=True, timeout=10, capture_output=True, text=True)
-            
+            if build == "gradle":
+                subprocess.run(["./gradlew", "test"], cwd=destination, check=True, timeout=10, capture_output=True, text=True)
+            elif build=="mvn":
+                subprocess.run(["mvn", "test"], cwd=destination, check=True, timeout=10, capture_output=True, text=True)
         except subprocess.TimeoutExpired as e:
             outcome += F"⏱️ Build timed out. Check manually."
-            outcome += f"<br></br>Result: {outcome}"
+            continue
         except subprocess.CalledProcessError as e:
             outcome += "❌ "
-
-        analysis = analyze(f"{destination}/src/main/java/{file}")
-        results_path = os.path.join(destination, "build", "test-results", "test", "TEST-*.xml")
-        result_files = glob.glob(results_path) # makes the TEST-*.xml work
-        if result_files:
-            xml_tree = ET.parse(result_files[0])
-            root = xml_tree.getroot()
-            all_tests = int(root.attrib.get('tests'))
-            failed = int(root.attrib.get('skipped'))+int(root.attrib.get('failures'))+int(root.attrib.get('errors'))
-            passed = all_tests-failed
-            if "❌" in outcome:
-                if passed == all_tests:
-                    outcome += "Something went wrong; Check manually"
-            else:
-                outcome += f"<br></br>Result: ✅ {passed}/{all_tests}"
         
-        outcome += f"<br></br>Analysis: {analysis}"
+        outcome+="<br></br>"
+        # analysis = analyze(f"{destination}/src/main/java/{file}")
+        outcome+="<br></br>"
 
-    print(outcome)
-    makehtml(outcome, file)
+        if build == 'gradle':
+            outcome = getXMLGradle(destination, outcome)
+        elif build == 'mvn':
+            print("Hi!")
+            results_path = os.path.join(destination, "target", "surefire-reports", "*Test.txt")
+            matched_path = glob.glob(results_path)
+            
+            if len(matched_path)>0:
+                for i in matched_path:
+                    with open(i, 'r') as test_file:
+                        for line in test_file:
+                            if "Tests run:" in line:
+                                outcome += line
+        
+        # outcome += f"<br></br>Analysis: {analysis}"
+        outcome_html+=outcome
+    makehtml(outcome_html, file)
 
 
 def run():
@@ -108,8 +133,7 @@ def run():
     # make the directory to store the project folder
     with tempfile.TemporaryDirectory(dir='.') as output_dir:
         # os.makedirs(output_dir, exist_ok=True)
-        destination = os.path.join(output_dir, datetime.now().strftime("%Y-%m-%d-%H-%M-%S"))
-        shutil.copytree(folder_path, destination, dirs_exist_ok=True)
+        shutil.copytree(folder_path, output_dir, dirs_exist_ok=True)
         
         # copy the submissions folder into local environment
         output_sub_dir = "submissions"
@@ -122,7 +146,7 @@ def run():
         my_sub = Submissions(output_sub_dir)
         my_sub.separate_by_folders()
 
-        results = run_files(destination, output_sub_dir)
+        results = run_files(output_dir, output_sub_dir)
         
     return results
 
