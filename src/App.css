@@ -89,11 +89,18 @@ h4, h3 {
   margin: 20px;
   flex-direction: column;
 }
-
+select{
+  padding: 5px;
+  padding-inline: 10px;
+  margin-bottom: 20px;
+  margin-inline: 20px;
+  font-size: 15px;}
 .inLine{
   display: flex;
   align-items: center;
+  justify-content: center;
 }
+
 .deleteBtn {
   background-color: transparent;
   padding: 5px;
