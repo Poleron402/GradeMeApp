@@ -51,11 +51,12 @@ app.on("ready", ()=> {
         return result.filePaths;
     })
 
-    ipcMain.on('run-python', (event, {folder1, folder2})=>{
-        const python = isDev()? spawn( pythonPath, [scriptPath, folder1 ?? "", folder2 ?? ""]):spawn( scriptPath, [folder1 ?? "", folder2 ?? ""], {shell:false})
+    ipcMain.on('run-python', (event, {folder1, folder2, language, build, is_separated})=>{
+        const python = isDev()? spawn( pythonPath, [scriptPath, folder1 ?? "", folder2 ?? "", language, build??"", is_separated]):spawn( scriptPath, [folder1 ?? "", folder2 ?? "", language, build??"", is_separated], {shell:false})
         let output = ''
         python.stdout.on("data", (result)=>{
             output += result.toString();
+            console.log(output)
         })
 
         python.stderr.on('data', (err)=>{
@@ -67,6 +68,7 @@ app.on("ready", ()=> {
             event.sender.send('python-result', data);
         } catch (err) {
             event.sender.send('python-error', `Failed to parse output: ${err}`);
+            console.log(`CAUGHT: ${err}`)
         }
     });
     })

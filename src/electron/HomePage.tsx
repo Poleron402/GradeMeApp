@@ -1,10 +1,14 @@
 import { useState } from 'react'
 import spinner from '../assets/source.gif'
 import Results from './pages/Results.js'
+import { GMASCII } from './components/GMASCII.js'
 
 const Home = () =>{
   const [folder1, setFolder1] = useState<string | undefined>()
   const [folder2, setFolder2] = useState<string | undefined>()
+  const [language, setLanguage] = useState<string>("Java")
+  const [build, setBuild] = useState<string|undefined>("gradle")
+  const [separated, setSeparated] = useState<boolean>(false)
   const [data, setData] = useState<Results[]>()
   const [error, setError] = useState<string | undefined> ()
   const [waiting, setWaiting] = useState<boolean>(false)
@@ -28,8 +32,10 @@ const Home = () =>{
   }
   const runScript = async()=>{
     setWaiting(true)
+    setError("")
+    console.log(build)
     try {
-      const result = await window.electronAPI.runScript(folder1, folder2);
+      const result = await window.electronAPI.runScript(folder1, folder2, language, build, separated);
       if (result) {
         setWaiting(false)
       }
@@ -38,6 +44,7 @@ const Home = () =>{
     } catch (err) {
       setWaiting(false)
       setError(String(err));
+      console.log(err)
     }
   }
   return (
@@ -47,17 +54,7 @@ const Home = () =>{
     <Results data={data ?? []} setShowResults={setShowResults}/>
     :
     <div>
-    <pre>
- ░▒▓██████▓▒░░▒▓███████▓▒░ ░▒▓██████▓▒░░▒▓███████▓▒░░▒▓████████▓▒░▒▓██████████████▓▒░░▒▓████████▓▒░ <br></br>
-░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░        <br></br>
-░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░        <br></br>
-░▒▓█▓▒▒▓███▓▒░▒▓███████▓▒░░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓██████▓▒░ ░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓██████▓▒░   <br></br>
-░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░        <br></br>
-░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░        <br></br>
- &nbsp;░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓███████▓▒░░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓████████▓▒░ <br></br>
-    </pre>                                                                                        
-                                                                                                    
-                                                                                                    
+     <GMASCII/>  {/* Was bothering my eyes so made a separate component */}
       <div id="mainButtons">
         <div className='buttonAndLink'>
           <button onClick={()=>{
@@ -83,11 +80,30 @@ const Home = () =>{
           </div>
         </div>
       </div>
+     
+        <select value={language} onChange={e=>setLanguage(e.target.value)}>
+          <option value="Java">Java</option>
+          <option value="Python">Python</option>
+          <option value="C++">C++</option>
+        </select>
+      {
+        language === "Java"&&(
+          <select value={build} onChange={e=>setBuild(e.target.value)}>
+            <option value="gradle">gradle</option>
+            <option value="mvn">maven</option>
+          </select>
+        )
+      }
+      <br></br>
+      <div className='inLine'><input type="checkbox" checked={separated} onClick={()=>setSeparated(!separated)}></input><p>Submission Folder Separated</p></div>
       {
         !waiting ? 
           
             !folder1 || !folder2  ?
-              <button disabled>Grade</button>
+              <div>
+                
+                <button disabled>Grade</button>
+              </div>
               :
               <button onClick={runScript}>Grade</button>
           :
