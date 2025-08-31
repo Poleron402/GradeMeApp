@@ -128,7 +128,8 @@ def run():
 
         # run the submissions folder manipulations - takes student submission files, cleans up the name, and separates them by folders named after student
         my_sub = Submissions(output_sub_dir)
-        my_sub.separate_by_folders()
+        if is_sorted.lower() == "false":
+            my_sub.separate_by_folders()    
 
         results = run_files(output_dir, output_sub_dir)
         
