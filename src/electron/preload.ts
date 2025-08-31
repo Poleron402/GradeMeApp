@@ -2,7 +2,7 @@ import { contextBridge, ipcRenderer } from "electron";
 
 contextBridge.exposeInMainWorld('electronAPI', {
     openFolder: ()=>ipcRenderer.invoke('dialog:openFolder'),
-    runScript: (folder1:string, folder2:string, language: string, build:string, is_separated:boolean)=> new Promise((resolve, reject) => {
+    runScript: (folder1:string, folder2:string, language: string, build:string, is_separated:string)=> new Promise((resolve, reject) => {
       ipcRenderer.once('python-result', (_event, data) => resolve(data));
       ipcRenderer.once('python-error', (_event, error) => reject(new Error(error)));
 

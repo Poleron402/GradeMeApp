@@ -33,9 +33,9 @@ const Home = () =>{
   const runScript = async()=>{
     setWaiting(true)
     setError("")
-    console.log(build)
+    const sep = separated.toString()
     try {
-      const result = await window.electronAPI.runScript(folder1, folder2, language, build, separated);
+      const result = await window.electronAPI.runScript(folder1, folder2, language, build, sep);
       if (result) {
         setWaiting(false)
       }
@@ -95,10 +95,8 @@ const Home = () =>{
         )
       }
       <br></br>
-      <div className='inLine'><input type="checkbox" checked={separated} onClick={()=>setSeparated(!separated)}></input><p>Submission Folder Separated</p></div>
+      <div className='inLine'><input type="checkbox" checked={separated} onChange={()=>setSeparated(!separated)}></input><p title="Check this if your student\'s files are already sorted in names directories like JaneDoe/Project.java">Submission Folder Separated</p></div>
       {
-        !waiting ? 
-          
             !folder1 || !folder2  ?
               <div>
                 
@@ -106,12 +104,6 @@ const Home = () =>{
               </div>
               :
               <button onClick={runScript}>Grade</button>
-          :
-          ""
-      }
-      {
-        waiting&&
-        <img width="200" src={spinner}></img>
       }
       {
         !waiting && data&&
@@ -120,9 +112,13 @@ const Home = () =>{
          <button title="Download a folder containing submissions sorted by student name" onClick={saveSortedSubmissions}>Download Sorted</button> 
         </>
       }
+      {
+        waiting&&
+        <img width="200" src={spinner}></img>
+      }
       {error&&
       <p>
-        error
+        Error: {error}
       </p>
       }
       </div>
