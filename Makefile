@@ -8,6 +8,13 @@ ifeq ($(OS),Windows_NT)
 	VENV_ENV = ./venv/Scripts/python
 endif
 
+start-dev:
+	cd app-be && \
+	$(PYTHON) -m venv venv && \
+	$(VENV_ENV) -m pip install -r requirements.txt && \
+	npm run transpile:electron
+	npm run build
+	npm run dev
 
 install-py:
 	cd app-be && \
@@ -22,4 +29,9 @@ build-app:
 	npm run build
 	npm run dist:linux
 
+restore-venv:
+	cd app-be && \
+	$(PYTHON) -m venv venv && \
+	$(VENV_ENV) -m pip install -r requirements.txt
+	
 all: install-py build-app
