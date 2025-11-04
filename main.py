@@ -73,7 +73,6 @@ def run_files(destination, files):
     for i in os.listdir(files):
         outcome = ''
         full_path = os.path.join(files, i)
-        
         student_files = os.listdir(full_path)
         outcome += f"<br></br>Name: {i}"
         continue_flag = False
@@ -83,45 +82,54 @@ def run_files(destination, files):
             if file != check_for_invalid_class_java(file_path):
                 continue_flag = True
             else:
-                temp_path = f"{destination}/src/main/java/{file}"
-                print(f"temp_path: {temp_path}")
-
-                shutil.copyfile(file_path, f"{destination}/src/main/java/{file}")
+                if os.path.exists(f"{destination}/src/main/java/org/example/{file}"): # checking if the required file is in a package
+                    temp_path = f"{destination}/src/main/java/org/example/{file}"
+                else:
+                    temp_path = f"{destination}/src/main/java/{file}"
+                print(temp_path)
+                shutil.copyfile(file_path, temp_path)
                 if not os.path.exists(temp_path):
                     continue_flag = True
         if continue_flag:
             outcome += "❌ Errors occured running stuident's submission. Check manually."
             outcome += f"<br></br>Result: {outcome}"
             continue
-
+        
         try:
             if build == "gradle":
                 subprocess.run(["./gradlew", "test"], cwd=destination, check=True, timeout=10, capture_output=True, text=True)
             elif build=="mvn":
+                print("hi")
                 subprocess.run(["mvn", "test"], cwd=destination, check=True, timeout=10, capture_output=True, text=True)
+                
         except subprocess.TimeoutExpired as e:
             outcome += F"⏱️ Build timed out. Check manually."
             continue
         except subprocess.CalledProcessError as e:
+            print(e)
             outcome += "❌ "
         
         outcome+="<br></br>"
-        # analysis = analyze(f"{destination}/src/main/java/{file}")
         outcome+="<br></br>"
 
         if build == 'gradle':
             outcome = getXMLGradle(destination, outcome)
-        elif build == 'mvn':
-            print("Hi!")
+        else:
             results_path = os.path.join(destination, "target", "surefire-reports", "*Test.txt")
             matched_path = glob.glob(results_path)
-            
+            print(matched_path)
             if len(matched_path)>0:
-                for i in matched_path:
-                    with open(i, 'r') as test_file:
+                for k in matched_path:
+                    with open(k, 'r') as test_file:
                         for line in test_file:
                             if "Tests run:" in line:
-                                outcome += line
+                                result_array = re.split(r": |, ", line)
+                                total = int(result_array[result_array.index("Tests run")+1])
+                                failed = int(result_array[result_array.index("Failures")+1])
+                                if total-failed == 10:
+                                    outcome += f"✅ {total-failed}/{total}"
+                                else:
+                                    outcome += f"{total-failed}/{total}"
         
         # outcome += f"<br></br>Analysis: {analysis}"
         outcome_html+=outcome
@@ -144,7 +152,9 @@ def run():
 
         # run the submissions folder manipulations - takes student submission files, cleans up the name, and separates them by folders named after student
         my_sub = Submissions(output_sub_dir)
-        my_sub.separate_by_folders()
+        print(type(is_sorted))
+        if is_sorted == "false":
+            my_sub.separate_by_folders()
 
         results = run_files(output_dir, output_sub_dir)
         
