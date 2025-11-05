@@ -65,10 +65,12 @@ app.on("ready", ()=> {
         python.on('close', () => {
         try {
             const { data } = JSON.parse(output);
+            console.log(data)
             event.sender.send('python-result', data);
         } catch (err) {
             event.sender.send('python-error', `Failed to parse output: ${err}`);
-            console.log(`CAUGHT: ${err}`)
+            console.error(`CAUGHT: ${err}`)
+            console.error(output)
         }
     });
     })

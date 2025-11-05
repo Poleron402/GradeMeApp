@@ -6,10 +6,8 @@ import re
 
 class Submissions:
     folder_path = os.getcwd()
-
     def __init__(self, folder_name):
         self.folder_path = folder_name
-
     # cleaning up the Canvas naming convention
     def cleanup(self, f_name):
         pattern1 = r"-\d+"

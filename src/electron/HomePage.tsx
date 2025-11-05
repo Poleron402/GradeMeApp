@@ -6,7 +6,7 @@ import { GMASCII } from './components/GMASCII.js'
 const Home = () =>{
   const [folder1, setFolder1] = useState<string | undefined>()
   const [folder2, setFolder2] = useState<string | undefined>()
-  const [language, setLanguage] = useState<string>("Java")
+  const [language, setLanguage] = useState<string>("java")
   const [build, setBuild] = useState<string|undefined>("gradle")
   const [separated, setSeparated] = useState<boolean>(false)
   const [data, setData] = useState<Results[]>()
@@ -82,12 +82,12 @@ const Home = () =>{
       </div>
      
         <select value={language} onChange={e=>setLanguage(e.target.value)}>
-          <option value="Java">Java</option>
-          <option value="Python">Python</option>
-          <option value="C++">C++</option>
+          <option value="java">Java</option>
+          <option value="python">Python</option>
+          <option value="c++">C++</option>
         </select>
       {
-        language === "Java"&&(
+        language === "java"&&(
           <select value={build} onChange={e=>setBuild(e.target.value)}>
             <option value="gradle">gradle</option>
             <option value="mvn">maven</option>
