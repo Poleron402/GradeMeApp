@@ -39,11 +39,10 @@ const Home = () =>{
       if (result) {
         setWaiting(false)
       }
-      setData(result); // assuming Python returns {"data": ...}
-      
+      setData(result) 
     } catch (err) {
       setWaiting(false)
-      setError(String(err));
+      setError(String(err))
       console.log(err)
     }
   }
@@ -54,7 +53,7 @@ const Home = () =>{
     <Results data={data ?? []} setShowResults={setShowResults}/>
     :
     <div>
-     <GMASCII/>  {/* Was bothering my eyes so made a separate component */}
+     <GMASCII/>  {/* Grademe ascii */}
       <div id="mainButtons">
         <div className='buttonAndLink'>
           <button onClick={()=>{
