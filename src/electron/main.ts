@@ -29,8 +29,8 @@ app.on("ready", ()=> {
     }
 
     const mainWindow = new BrowserWindow({
-        width: 1100,
-        height: 800,
+        width: 1500,
+        height: 1000,
         webPreferences:{
             preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: true,

@@ -2,7 +2,8 @@ import { useState } from 'react'
 import spinner from '../assets/source.gif'
 import Results from './pages/Results.js'
 import { GMASCII } from './components/GMASCII.js'
-
+import { InfoFolderSeparatedPopUp } from './components/InfoFolderSeparated.js'
+import { CircleQuestionMark } from 'lucide-react'
 const Home = () =>{
   const [folder1, setFolder1] = useState<string | undefined>()
   const [folder2, setFolder2] = useState<string | undefined>()
@@ -13,7 +14,7 @@ const Home = () =>{
   const [error, setError] = useState<string | undefined> ()
   const [waiting, setWaiting] = useState<boolean>(false)
   const [showResults, setShowResults] = useState<boolean>(false)
-  
+  const [popupOn, setPopupOn] = useState<boolean>(false)
   const openFolder = async(folder:string) =>{
     const filePath = await window.electronAPI.openFolder()
     if (filePath != undefined){
@@ -94,7 +95,14 @@ const Home = () =>{
         )
       }
       <br></br>
-      <div className='inLine'><input type="checkbox" checked={separated} onChange={()=>setSeparated(!separated)}></input><p title="Check this if your student\'s files are already sorted in names directories like JaneDoe/Project.java">Submission Folder Separated</p></div>
+      <div className='inLine'>
+        <input type="checkbox" checked={separated} onClick={()=>setSeparated(!separated)}></input>
+        <p>Submission Folder Separated</p>
+        <CircleQuestionMark width={17} id="qMark" onClick={()=>setPopupOn(true)}/>
+      </div>
+      {popupOn &&
+        <InfoFolderSeparatedPopUp setPopupOn={setPopupOn}/>
+      }
       {
             !folder1 || !folder2  ?
               <div>

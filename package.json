@@ -18,18 +18,19 @@
     "dist:linux": "npm run transpile:electron && npm run build && electron-builder --linux --x64"
   },
   "build": {
-  "extraResources": [
-    {
-      "from": "dist-electron/main",
-      "to": "main"
-    },
-    {
-      "from": "dist-electron/ollama_code_analysis",
-      "to": "ollama_code_analysis"
-    }
-  ]
-},
+    "extraResources": [
+      {
+        "from": "dist-electron/main",
+        "to": "main"
+      },
+      {
+        "from": "dist-electron/ollama_code_analysis",
+        "to": "ollama_code_analysis"
+      }
+    ]
+  },
   "dependencies": {
+    "lucide-react": "^0.552.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.7.1"
