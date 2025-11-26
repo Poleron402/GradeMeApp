@@ -32,6 +32,7 @@ const Results = ({data, setShowResults}:{data:Results[], setShowResults:Dispatch
     useEffect(()=>{
         setAnalysis("")
     }, [path])
+    console.log(data)
     return (
         <div id="resultsPage">
             <div id="scores">

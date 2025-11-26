@@ -52,7 +52,7 @@ app.on("ready", ()=> {
     })
 
     ipcMain.on('run-python', (event, {folder1, folder2, language, build, is_separated})=>{
-        const python = isDev()? spawn( pythonPath, [scriptPath, folder1 ?? "", folder2 ?? "", language, build??"", is_separated]):spawn( scriptPath, [folder1 ?? "", folder2 ?? "", language, build??"", is_separated], {shell:false})
+        const python = isDev()? spawn( pythonPath, [scriptPath, folder1 ?? "", folder2 ?? "", language, build, is_separated]):spawn( scriptPath, [folder1 ?? "", folder2 ?? "", language, build??"", is_separated], {shell:false})
         let output = ''
         python.stdout.on("data", (result)=>{
             output += result.toString();

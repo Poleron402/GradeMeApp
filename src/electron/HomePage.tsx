@@ -4,6 +4,7 @@ import Results from './pages/Results.js'
 import { GMASCII } from './components/GMASCII.js'
 import { InfoFolderSeparatedPopUp } from './components/InfoFolderSeparated.js'
 import { CircleQuestionMark } from 'lucide-react'
+
 const Home = () =>{
   const [folder1, setFolder1] = useState<string | undefined>()
   const [folder2, setFolder2] = useState<string | undefined>()
@@ -23,6 +24,10 @@ const Home = () =>{
       else
         setFolder2(filePath)
     }
+  }
+  const default_mapper: Record<string, string> = {
+    "python": "pytest",
+    "java": "gradle"
   }
   const saveSortedSubmissions = async() =>{
     try{
@@ -81,7 +86,10 @@ const Home = () =>{
         </div>
       </div>
      
-        <select value={language} onChange={e=>setLanguage(e.target.value)}>
+        <select value={language} onChange={e=>{
+            setLanguage(e.target.value)
+            setBuild(default_mapper[e.target.value])
+          }}>
           <option value="java">Java</option>
           <option value="python">Python</option>
           <option value="c++">C++</option>
@@ -94,6 +102,15 @@ const Home = () =>{
           </select>
         )
       }
+      {
+        language === "python"&&(
+          <select value={build} onChange={e=>{
+            setBuild(e.target.value)}}>
+            <option value="pytest">pytest</option>
+            <option value="unittest">unittest</option>
+          </select>
+        )
+      }
       <br></br>
       <div className='inLine'>
         <input type="checkbox" checked={separated} onClick={()=>setSeparated(!separated)}></input>
@@ -103,6 +120,12 @@ const Home = () =>{
       {popupOn &&
         <InfoFolderSeparatedPopUp setPopupOn={setPopupOn}/>
       }
+        {
+          waiting&&
+          <>
+          <img width="200" src={spinner}></img><br></br>
+          </>
+        }
       {
             !folder1 || !folder2  ?
               <div>
@@ -118,10 +141,6 @@ const Home = () =>{
         <button id="resButton" onClick={()=>setShowResults(true)}>Show Results</button>
          <button title="Download a folder containing submissions sorted by student name" onClick={saveSortedSubmissions}>Download Sorted</button> 
         </>
-      }
-      {
-        waiting&&
-        <img width="200" src={spinner}></img>
       }
       {error&&
       <p>

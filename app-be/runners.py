@@ -2,14 +2,95 @@ import os
 import shutil
 import glob
 import re
+import unittest
 import subprocess
 import xml.etree.ElementTree as ET
 from abc import ABC, abstractmethod
 
 class TestRunner(ABC):
+    # initialising all the required folder locations
+    def __init__(self, build, destination, submission_files_location):
+        self.build = build
+        self.destination = destination
+        self.submission_files_location = submission_files_location
+
     @abstractmethod
     def run_tests(self):
-        '''The method responsible for the main test running funcitonality'''
+        '''The method responsible for the main test running functionality'''
+
+    def move_and_validate_student_files(self, student_name):
+        outcome = ""
+        student = {}
+        student["name"] = student_name
+        full_path = os.path.join(self.submission_files_location, student_name)
+        student_files = os.listdir(full_path)
+        continue_flag = False
+        for file in student_files:
+            temp_path = ""
+            if  self.__class__.__name__ == "JavaTestRunner":
+                file_path = os.path.join(full_path, file)
+                if file != self.check_for_invalid_class_java(file_path):
+                    continue_flag = True
+                else:
+                    current_dir = os.getcwd()
+                    student["file_path"] = os.path.join(current_dir, file_path)
+                    if os.path.exists(f"{self.destination}/src/main/java/org/example/{file}"): # checking if the required file is in a package
+                        temp_path = f"{self.destination}/src/main/java/org/example/{file}"
+                    else:
+                        temp_path = f"{self.destination}/src/main/java/{file}"
+                    shutil.copyfile(file_path, temp_path)
+
+            elif self.__class__.__name__== "PythonTestRunner":
+                temp_path = f"{self.destination}/{file}"
+                file_path = os.path.join(full_path, file)
+                current_dir = os.getcwd()
+                student["file_path"] = os.path.join(current_dir, file_path)
+                shutil.copyfile(file_path, temp_path)
+                
+            if not os.path.exists(temp_path):
+                continue_flag = True
+                outcome += "❌ Errors occured running stuident's submission. Check manually."
+                student["result"] = outcome
+                student["analysis"] = ""
+                student["result"] = outcome
+        return continue_flag, student, outcome
+    
+# Python runner 
+class PythonTestRunner(TestRunner):
+    def run_tests(self):
+        outcome_list = []
+        for i in os.listdir(self.submission_files_location):
+            c_flag, student, outcome = super().move_and_validate_student_files(i)
+            if c_flag: 
+                continue
+            if self.build == "pytest":
+                try: 
+                    result = subprocess.run(['pytest', '--tb=short'], cwd=self.destination, timeout=10, text=True, capture_output=True)
+                    res = result.stdout.splitlines()[-1].replace('=', '')
+                except subprocess.TimeoutExpired as e:
+                    outcome += F"⏱️ Build timed out. Check manually."
+                    student["result"] = outcome
+                    continue
+                except subprocess.CalledProcessError as e:
+                    student["result"] =  f"❌ {res}"
+                outcome += "❌ "
+                
+                if 'failed' not in res and 'passed' in res:
+                    student["result"] = f"✅ {res}"
+                else:
+                    student["result"] =  f"❌ {res}"
+            else:
+                loader = unittest.TestLoader()
+                suite = loader.discover(start_dir=self.destination, pattern="test*.py")
+                runner = unittest.TextTestRunner(verbosity=2) # Verbosity level for output
+                result = runner.run(suite)
+                outcome += f"{result.testsRun - len(result.failures)}/{result.testsRun}"
+            
+            student["analysis"] = ""
+            outcome_list.append(student)
+        return outcome_list
+
+# Java runner
 
 class JavaTestRunner(TestRunner):
     def __init__(self, build, destination, submission_files_location):
@@ -17,7 +98,7 @@ class JavaTestRunner(TestRunner):
         self.destination = destination
         self.submission_files_location = submission_files_location
 
-    # checking if the filename is the same as the class name it contains (for java, it has to be)
+    ''' checking if the filename is the same as the class name it contains (for java, it has to be)'''
     def check_for_invalid_class_java(self, file):
         with open(file, 'r') as f:
             content = f.readlines()
@@ -30,6 +111,9 @@ class JavaTestRunner(TestRunner):
         else:
             return ""
     
+    ''' Since we are not printing out gradle test output but rather parsing the generated XML (to avoid any syntactical errors while parsing),
+        We might need that method here 
+    '''
     def getXMLGradle(self, outcome):
         results_path = os.path.join(self.destination, "build", "test-results", "test", "TEST-*.xml")
         result_files = glob.glob(results_path) # makes the TEST-*.xml work
@@ -49,44 +133,16 @@ class JavaTestRunner(TestRunner):
 
         return outcome
 
+    
     def run_tests(self):
+
         outcome_list = []
         for i in os.listdir(self.submission_files_location):
             # start the outcome string that will be printed out and sent to FE
-            outcome = '' 
-
-            student = {}
-            student["name"] = i
-            full_path = os.path.join(self.submission_files_location, i)
-            
-
-            student_files = os.listdir(full_path)
-            continue_flag = False
-            for file in student_files:
-                file_path = os.path.join(full_path, file)
-                if file != self.check_for_invalid_class_java(file_path):
-                    continue_flag = True
-                else:
-                    
-                    current_dir = os.getcwd()
-                    student["file_path"] = os.path.join(current_dir, file_path)
-                    if os.path.exists(f"{self.destination}/src/main/java/org/example/{file}"): # checking if the required file is in a package
-                        temp_path = f"{self.destination}/src/main/java/org/example/{file}"
-                    else:
-                        temp_path = f"{self.destination}/src/main/java/{file}"
-                    shutil.copyfile(file_path, temp_path)
-                    if not os.path.exists(temp_path):
-                        continue_flag = True
-
-            if continue_flag:
-                outcome += "❌ Errors occured running stuident's submission. Check manually."
-                student["result"] = outcome
-                student["analysis"] = ""
-                student["result"] = outcome
-                outcome_list.append(student)
+            c_flag, student, outcome = super().move_and_validate_student_files(i)
+            if c_flag: 
                 continue
 
-            current_dir = os.getcwd()
             try:
                 if self.build == "gradle":
                     subprocess.run(["./gradlew", "test"], cwd=self.destination, check=True, timeout=10, capture_output=True, text=True)
