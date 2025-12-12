@@ -2,6 +2,7 @@ import os
 import shutil
 import glob
 import re
+import time
 import unittest
 import subprocess
 import xml.etree.ElementTree as ET
@@ -73,19 +74,26 @@ class PythonTestRunner(TestRunner):
                     continue
                 except subprocess.CalledProcessError as e:
                     student["result"] =  f"❌ {res}"
-                outcome += "❌ "
                 
                 if 'failed' not in res and 'passed' in res:
                     student["result"] = f"✅ {res}"
                 else:
                     student["result"] =  f"❌ {res}"
             else:
-                loader = unittest.TestLoader()
-                suite = loader.discover(start_dir=self.destination, pattern="test*.py")
-                runner = unittest.TextTestRunner(verbosity=2) # Verbosity level for output
-                result = runner.run(suite)
-                outcome += f"{result.testsRun - len(result.failures)}/{result.testsRun}"
-            
+                try: 
+                    result = subprocess.run(['python', '-m', 'unittest'], cwd=self.destination, timeout=10, text=True, capture_output=True)
+                    run_info = result.stderr.splitlines()[-3:]
+                    res = " ".join(run_info)
+                    if run_info[-1] == "OK":
+                        student["result"] = f"✅ {res}"
+                    else:
+                        student["result"] =  f"❌ {res}"
+                except subprocess.TimeoutExpired as e:
+                    outcome += F"⏱️ Build timed out. Check manually."
+                    student["result"] = outcome
+                    continue
+                except subprocess.CalledProcessError as e:
+                    student["result"] =  f"❌ {res}"
             student["analysis"] = ""
             outcome_list.append(student)
         return outcome_list

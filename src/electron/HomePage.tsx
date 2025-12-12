@@ -74,11 +74,11 @@ const Home = () =>{
           </div>
         </div>
         <div className='buttonAndLink'>
-          <button onClick={()=>openFolder("folder2") } className='selectButton'>Select Testing Folder</button>
+          <button onClick={()=>openFolder("folder2") } id = 'openTesting' className='selectButton'>Select Testing Folder</button>
           <div className="inLine">
             {folder2 && folder2.length > 0 && 
             <>
-            <p>{folder2}</p>
+            <p id='testingFolder'>{folder2}</p>
             <button className="deleteBtn" onClick={()=>setFolder2(undefined)}>X</button>
             </>}
             
@@ -86,7 +86,7 @@ const Home = () =>{
         </div>
       </div>
      
-        <select value={language} onChange={e=>{
+        <select className="langBuildSelector" value={language} onChange={e=>{
             setLanguage(e.target.value)
             setBuild(default_mapper[e.target.value])
           }}>
@@ -96,7 +96,7 @@ const Home = () =>{
         </select>
       {
         language === "java"&&(
-          <select value={build} onChange={e=>setBuild(e.target.value)}>
+          <select className="langBuildSelector" value={build} onChange={e=>setBuild(e.target.value)}>
             <option value="gradle">gradle</option>
             <option value="mvn">maven</option>
           </select>
@@ -130,10 +130,10 @@ const Home = () =>{
             !folder1 || !folder2  ?
               <div>
                 
-                <button disabled>Grade</button>
+                <button id="gradeButtonDisabled" disabled>Grade</button>
               </div>
               :
-              <button onClick={runScript}>Grade</button>
+              <button id="gradeButton" onClick={runScript}>Grade</button>
       }
       {
         !waiting && data&&

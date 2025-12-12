@@ -45,9 +45,14 @@ app.on("ready", ()=> {
     }
 
     ipcMain.handle('dialog:openFolder', async () => {
-        const result = await dialog.showOpenDialog({
+        const result = await dialog.showOpenDialog(isDev()?{
             properties: ['openDirectory'],
-        });
+            defaultPath: "/home/pol/projects/GradeMeTestingFolder",
+        }:
+        {
+            properties: ['openDirectory'],
+        }
+        );
         return result.filePaths;
     })
 

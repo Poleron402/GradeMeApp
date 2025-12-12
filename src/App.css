@@ -99,8 +99,16 @@ select{
 }
 .selectButton{
   background-color: #000000;
+  color: #64ffb7;
   font-size: 18px;
   border: 2px solid rgb(25, 40, 41);
+}
+#gradeButtonDisabled, #gradeButtonDisabled:hover{
+  border: none;
+  color: #3b3b3b;
+}
+.langBuildSelector, #gradeButton{
+  color: whitesmoke;
 }
 .inLine{
   display: flex;
