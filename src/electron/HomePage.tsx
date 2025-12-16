@@ -5,7 +5,9 @@ import { GMASCII } from './components/GMASCII.js'
 import { InfoFolderSeparatedPopUp } from './components/InfoFolderSeparated.js'
 import { CircleQuestionMark } from 'lucide-react'
 
-const Home = () =>{
+
+
+const Home = () => {
   const [folder1, setFolder1] = useState<string | undefined>()
   const [folder2, setFolder2] = useState<string | undefined>()
   const [language, setLanguage] = useState<string>("java")
@@ -52,6 +54,7 @@ const Home = () =>{
       console.log(err)
     }
   }
+
   return (
     <>
     <div id="home">
@@ -120,12 +123,12 @@ const Home = () =>{
       {popupOn &&
         <InfoFolderSeparatedPopUp setPopupOn={setPopupOn}/>
       }
-        {
-          waiting&&
+      {
+        waiting&&
           <>
-          <img width="200" src={spinner}></img><br></br>
+            <img width="200" src={spinner}></img><br></br>
           </>
-        }
+      }
       {
             !folder1 || !folder2  ?
               <div>

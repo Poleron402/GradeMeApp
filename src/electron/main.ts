@@ -14,6 +14,8 @@ app.on("ready", ()=> {
     let pythonPath = ""
     let scriptPath = ""
     let ollamaPath = ""
+    let rubricPath = ""
+
     if (isDev()) {
         const __scriptdirname = path.join(__dirname, '..', 'app-be')
         pythonPath = isWindows
@@ -22,10 +24,11 @@ app.on("ready", ()=> {
         
         scriptPath = path.join(__scriptdirname, "main.py")
         ollamaPath = path.join(__scriptdirname, "ollama_code_analysis.py")
-
+        rubricPath = path.join(__scriptdirname, "ollama_rubric_generation.py")
     }else{
         scriptPath = isWindows? path.join(process.resourcesPath, "main.exe") :path.join(process.resourcesPath, "main")
         ollamaPath = isWindows? path.join(process.resourcesPath, "ollama_code_analysis.exe") :path.join(process.resourcesPath, "ollama_code_analysis")
+        rubricPath = isWindows? path.join(process.resourcesPath, "ollama_rubric_generation.exe") :path.join(process.resourcesPath, "ollama_rubric_generation")
     }
 
     const mainWindow = new BrowserWindow({
@@ -116,6 +119,43 @@ app.on("ready", ()=> {
             }
         }
         return filePaths[0]
+    })
+
+    ipcMain.handle('fileReader', async(_, path)=>{
+        if (!path) {
+            console.error("NO PATH RECEIVED")
+            return null
+        }
+
+        if (!fs.existsSync(path)) {
+            console.error("FILE DOES NOT EXIST:", path)
+            return null
+        }
+        const code:string = fs.readFileSync(path, "utf-8")
+        return  code
+    .replace(/\t/g, "    ")
+    .replace(/\r\n/g, "\n")
+    .trimEnd()
+    })
+
+    ipcMain.on('run-ollama-rubric', (event, {points, about, important, unimportant})=>{
+        const python = isDev()? spawn(pythonPath, [rubricPath, points, about, important, unimportant]):spawn(ollamaPath, [points, about, important, unimportant], {shell:false})
+        let output = ''
+        python.stdout.on("data", (result)=>{
+            output += result.toString();
+        })
+
+        python.stderr.on('data', (err)=>{
+            event.sender.send('rubric-error', err.toString());
+        })
+        python.on('close', () => {
+        try {
+            const data = output;
+            event.sender.send('rubric-result', data);
+        } catch (err) {
+            event.sender.send('rubric-error', `Failed to parse output: ${err}`);
+        }
+        })
     })
 })
 

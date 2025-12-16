@@ -161,8 +161,9 @@ textarea{
 #duck{
   transform: scale(0.5);
 }
-#ollamaPrompt{
+#ollamaPrompt, #studentCode{
   overflow: auto;
+  resize: horizontal;
   scrollbar-width: none; 
   display: flex;
   flex-direction: column;
@@ -178,6 +179,10 @@ textarea{
   backdrop-filter: blur(5.9px);
   -webkit-backdrop-filter: blur(5.9px);
   border: 1px solid rgba(255, 255, 255, 0.3);
+}
+#studentCode{
+  
+  background: #282d35;
 }
 #scores::-webkit-scrollbar-thumb {
   background: #888; /* Example color */
@@ -222,4 +227,103 @@ textarea{
   position: absolute;
   right: 0px;
   top: 7px;
+}
+.cm-editor {
+  font-size:16px;
+  width: 20vw;
+  text-align: left;
+  max-width: 1200px;
+  height: 600px;
+}
+#navigatorDiv {
+  position: relative;
+  padding: 15px;
+  padding-inline: 35px;
+  background-color: #1a1a1a;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+#navigatorExtras{
+  width: 5%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.link{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+
+#rubricPage{
+  display: flex;
+}
+#rubricResult{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+table{
+  font-size: .8vw;
+  border-collapse: collapse;
+  /* border: 2px solid #64ffb7; */
+}
+#table{
+  tr:nth-child(odd){
+    background-color: #1a1a1a;
+  }
+  th{
+    background-color: #1a1a1a;
+    border: 1px dotted #64ffb7;
+    padding: 10px;
+    padding-inline: 20px;
+  }
+  td{
+    padding: 10px;
+    max-width: 200px;
+  }
+}
+#rubric{
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: baseline;
+  color: #64ffb7;
+  margin-top: -50px;
+  margin-left: -50px;
+
+}
+
+
+#rubric{
+  td{
+    padding: 20px;
+    border-bottom: 1px solid #90afa1;
+  }
+  table{
+  border-collapse: collapse;
+  border-radius: 50px;
+  font-size: 15px;
+}
+  td:nth-child(odd){
+    padding: 20px;
+    max-width: 250px;
+  }
+}
+.questionnaire{
+  font-size: 15px;
+  background-color: #90afa1;
+}
+#numberOfPoints{
+  padding: 10px;
+  font-size: 15px;
+  background-color: #90afa1;
+  color: #282d35;
 }

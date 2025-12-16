@@ -16,6 +16,8 @@ declare global {
       runScript: (folder1:string | undefined, folder2:string |undefined, language: string|undefined, build:string|undefined, is_separated:string) => Promise<Results[]>;
       runOllama: (path:string, rubric:string) => Promise<string>;
       downloadFolder: () => Promise<string>;
+      getFileContent: (path: string)=>Promise<string>;
+      getRubric: (points: string, about: string, important: string, unimportant: string)=>Promise<string>
     }
   }
 }

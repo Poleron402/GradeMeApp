@@ -15,5 +15,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.send('run-codellama', { path, rubric });
     }),
     downloadFolder: ()=>ipcRenderer.invoke('dialog:downloadFolder'),
-    
+    getFileContent: (filePath: string)=>ipcRenderer.invoke('fileReader', filePath),
+    getRubric: (points: string, about: string, important: string, unimportant: string)=>new Promise((resolve, reject) => {
+      ipcRenderer.once('rubric-result', (_event, data) => resolve(data));
+      ipcRenderer.once('rubric-error', (_event, error) => reject(new Error(error)));
+
+      ipcRenderer.send('run-ollama-rubric', { points, about, important, unimportant});
+    }),
 })

@@ -24,6 +24,7 @@ install-py:
 	$(PYTHON) -m venv venv && \
 	$(VENV_ENV) -m pip install -r requirements.txt && \
 	$(VENV_ENV) -m PyInstaller --onefile main.py && \
+	$(VENV_ENV) -m PyInstaller --onefile ollama_rubric_generation.py && \
 	$(VENV_ENV) -m PyInstaller --onefile ollama_code_analysis.py && rm -rf venv
 
 build-app:
