@@ -1,9 +1,8 @@
 import  { useEffect, useState } from "react"
 import { type Dispatch, type SetStateAction } from "react"
-import { Sparkles, FileCodeCorner } from "lucide-react"
+import { Sparkles } from "lucide-react"
 import duck from '../../assets/duck.gif'
-import ReactCodeMirror from "@uiw/react-codemirror";
-
+import StudentCode from "../components/StudentCode"
 
 const Results = ({data, setShowResults}:{data:Results[], setShowResults:Dispatch<SetStateAction<boolean>>}) =>{
     
@@ -14,6 +13,8 @@ const Results = ({data, setShowResults}:{data:Results[], setShowResults:Dispatch
     const [rubric, setRubric] = useState<string>("");
     const [error, setError] = useState<string | undefined> ()
     const [analysis, setAnalysis] = useState<string>()
+    // const [selectedText, setSelectedText] = useState<string|undefined>();
+
     const getAnalysis = async() =>{
         setLoading(true)
         try{
@@ -39,7 +40,9 @@ const Results = ({data, setShowResults}:{data:Results[], setShowResults:Dispatch
     }
     useEffect(()=>{
         setAnalysis("")
+
     }, [path])
+    console.log(data)
     return (
         <div id="resultsPage">
             <div id="scores">
@@ -88,17 +91,7 @@ const Results = ({data, setShowResults}:{data:Results[], setShowResults:Dispatch
                             <p>{analysis}</p>
                         }
                     </div>
-                    <div id="studentCode">
-                        <p><FileCodeCorner/>Student Code</p>
-                        <h3>Review and ask</h3> <br></br>
-                        <div id="codeMirror">
-                        <ReactCodeMirror
-                            minWidth="350px"
-                            theme="dark"
-                            value={currentCode}
-                        />
-                        </div>
-                    </div>
+                    <StudentCode currentCode={currentCode}/>
                 </>
             }
         </div>
