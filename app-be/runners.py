@@ -52,8 +52,6 @@ class TestRunner(ABC):
                 continue_flag = True
                 outcome += "❌ Errors occured running stuident's submission. Check manually."
                 student["result"] = outcome
-                student["analysis"] = ""
-                student["result"] = outcome
         return continue_flag, student, outcome
     
 # Python runner 
@@ -94,7 +92,6 @@ class PythonTestRunner(TestRunner):
                     continue
                 except subprocess.CalledProcessError as e:
                     student["result"] =  f"❌ {res}"
-            student["analysis"] = ""
             outcome_list.append(student)
         return outcome_list
 
@@ -184,8 +181,6 @@ class JavaTestRunner(TestRunner):
                                     else:
                                         outcome += f"{total-failed}/{total}"
                 
-
-            student["analysis"] = ""
             student["result"] = outcome
             outcome_list.append(student)
         
