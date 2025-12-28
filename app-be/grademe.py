@@ -3,10 +3,10 @@ import os
 import re
 
 
-
+"""Class Submissions is used to separate student submission folders by name, and cleans up Canvas' file naming convention"""
 class Submissions:
     folder_path = os.getcwd()
-    folder_student_names = []
+    folder_student_names = {}
     def __init__(self, folder_name, project_type):
         self.folder_path = folder_name
         self.project_type = project_type
@@ -22,6 +22,8 @@ class Submissions:
     def separate_by_folders(self):
         for filename in os.listdir(self.folder_path):
             my_path = os.path.join(self.folder_path, filename)
+            # default needed extension is .java, otherwise we check
+            # TODO: as the application expands, allowed filetypes might have to be expanded
             needed_extension = ".java"
             if self.project_type == "python":
                 needed_extension = ".py"
@@ -31,6 +33,12 @@ class Submissions:
                 needed_extension = ".c"
             if filename.endswith(needed_extension):
                 new_filename = self.cleanup(filename)
+                # handles duplicate student names
+                if new_filename not in self.folder_student_names:
+                    self.folder_student_names[new_filename] = 1
+                else:
+                    new_filename += str(self.folder_student_names[new_filename])
+                    self.folder_student_names[new_filename] += 1
                 # creating new path to rename files appropriately
                 new_path = os.path.join(self.folder_path, new_filename)
                 os.rename(my_path, new_path)

@@ -1,22 +1,31 @@
 import ollama
 import sys
 
-
 submission_folder_path = sys.argv[1]
 rubric = sys.argv[2]
 
 
 with open(submission_folder_path, 'r') as file:
     code = file.read()
+
+system_prompt = '''
+You are a helpful expert who is good at finding bugs and mishaps in student code. 
+Follow directions strictly, if so specified. If the code has any room for improvement, add the improvement suggestions 
+in a form of an unordered list (bullet points). Use the following format for your response.
+" -- HOW WELL DOES CODE FOLLOW THE RUBRIC -- \n
+* Provide your answer
+ -- DOES THE CODE CONTAIN ANY VULGAR OR PASSIVE AGRESSIVE COMMENTS -- 
+* Provide specific examples from code; surround the examples with ` ` for single line and ``` ``` for multiple lines.
+* If the code is free of vulgarities - skip this whole section
+-- WHAT IMPROVEMENTS CAN STUDENT DO --\n
+* Provide the  improvements, format the answer like so:
+* You can even include typo and grammar suggestions, if there is nothing to improve
+* If there is truly nothing to improve or work on, give a congratulatory message and a cute emoji.
+ '''
+
 if len(rubric)>0:
     prompt =f'''
-        You are a strict code reviewer who always follows best coding practices.
-        Your task is TWO-FOLD:
-        1. If the rubric contains explicit questions, answer them directly and clearly.
-        2. If the rubric contains any specific rubric or grading criteria, then, check whether the code meets the rubric criteria and provide feedback.
-        Do not skip step 1. Do not invent questions that aren't there.
-        Keep your response under 150 words.
-        Do not mention that you are a strict code reviewer.
+
     Rubric:
     {rubric}
 
@@ -26,7 +35,6 @@ if len(rubric)>0:
 '''   
 else:
     prompt =f'''
-    You are a code reviewer that strictly follows the best coding practices.
     In a few sentences (<=200 words strictly), check if the code is well written. Outline any shortcomings.
     Do not analyze anything else.
     Code:
@@ -34,7 +42,7 @@ else:
 '''   
 response =  ollama.chat(
     model='llama3',
-    messages=[{'role': 'user', 'content': prompt}]
+    messages=[{'role': 'system', 'content': system_prompt},{'role': 'user', 'content': prompt}]
 )
 print(response.message.content)
 

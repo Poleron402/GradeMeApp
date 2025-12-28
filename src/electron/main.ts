@@ -69,6 +69,7 @@ app.on("ready", ()=> {
 
         python.stderr.on('data', (err)=>{
             event.sender.send('python-error', err.toString());
+            console.log(err.toString())
         })
         python.on('close', () => {
         try {

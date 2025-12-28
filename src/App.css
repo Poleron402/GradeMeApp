@@ -1,5 +1,4 @@
 #root {
-  /* max-width: 1280px; */
   margin: 0px;
   text-align: center;
 }
@@ -64,6 +63,10 @@ h4, h3 {
 .student{
   padding: 20px;
   /* transition: all .6s ease-in; */
+}
+#resultMarkdown{
+  /* overflow: scroll; */
+
 }
 .studentSelected {
   background: #898fffa6;
@@ -171,7 +174,8 @@ textarea{
   margin: 5px;
   border-radius: 20px;
   overflow-y: auto;
-  width: 50%;
+  width: fit-content;
+  min-width: 400px;
   padding: 30px;
   background: #646cff;
   border-radius: 16px;
@@ -275,6 +279,7 @@ table{
   border-collapse: collapse;
   /* border: 2px solid #64ffb7; */
 }
+
 #table{
   tr:nth-child(odd){
     background-color: #1a1a1a;

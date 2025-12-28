@@ -3,6 +3,8 @@ import { type Dispatch, type SetStateAction } from "react"
 import { Sparkles } from "lucide-react"
 import duck from '../../assets/duck.gif'
 import StudentCode from "../components/StudentCode"
+import ReactMarkdown from 'react-markdown' 
+
 
 const Results = ({data, setShowResults}:{data:Results[], setShowResults:Dispatch<SetStateAction<boolean>>}) =>{
     
@@ -13,6 +15,8 @@ const Results = ({data, setShowResults}:{data:Results[], setShowResults:Dispatch
     const [rubric, setRubric] = useState<string>("");
     const [error, setError] = useState<string | undefined> ()
     const [analysis, setAnalysis] = useState<string>()
+    const [name, setName] = useState<string>()
+
     // const [selectedText, setSelectedText] = useState<string|undefined>();
 
     const getAnalysis = async() =>{
@@ -50,23 +54,34 @@ const Results = ({data, setShowResults}:{data:Results[], setShowResults:Dispatch
 
             {
                 data && data.map((result:Results)=>(
-                    <div key={result.file_path} className={result.file_path === path? "studentSelected":"student"}>
+                    <div key={result.name} className={result.name === name? "studentSelected":"student"}>
                     <h3>Name: {result.name}</h3>
                     <h4>Test Score: {result.result}</h4>
                     {
-                        showAnalysis === result.file_path?
+                        result.file_path.map((sfile:string)=>{
+                            const sfile_array = sfile.split("/")
+                            return(
+                                <>
+                            <button onClick={()=>{
+                            setShowAnalysis(sfile)
+                            setPath(sfile)
+                            setName(result.name)
+                            getCode(sfile)}
+                        }>
+                                {sfile_array[sfile_array.length-1]}
+                            </button>
+                            <br></br></>)
+                    }   )
+                    }
+                    {
+                        showAnalysis && showAnalysis !="" &&
                         <>
                         <button onClick={()=>{
                             
                             setShowAnalysis("")
-                            setPath("")}}>Hide analysis</button>
+                            setPath("")
+                            setName("")}}>Hide analysis</button>
                         </>
-                        :
-                        <button onClick={()=>{
-                            setShowAnalysis(result.file_path)
-                            setPath(result.file_path)
-                            getCode(result.file_path)}
-                        }>Show AI analysis</button>
                     }
                     </div>
                 ))
@@ -88,12 +103,15 @@ const Results = ({data, setShowResults}:{data:Results[], setShowResults:Dispatch
                         {loading?
                             <img id="duck" src={duck}></img>
                             :
-                            <p>{analysis}</p>
+                            <div id="resultMarkdown">
+                                <ReactMarkdown >{analysis}</ReactMarkdown>
+                            </div>
                         }
                     </div>
                     <StudentCode currentCode={currentCode}/>
                 </>
             }
+
         </div>
     )
 }

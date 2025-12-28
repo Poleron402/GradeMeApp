@@ -23,6 +23,7 @@ class TestRunner(ABC):
         outcome = ""
         student = {}
         student["name"] = student_name
+        student["file_path"] = []
         full_path = os.path.join(self.submission_files_location, student_name)
         student_files = os.listdir(full_path)
         continue_flag = False
@@ -34,7 +35,7 @@ class TestRunner(ABC):
                     continue_flag = True
                 else:
                     current_dir = os.getcwd()
-                    student["file_path"] = os.path.join(current_dir, file_path)
+                    student["file_path"].append(os.path.join(current_dir, file_path))
                     if os.path.exists(f"{self.destination}/src/main/java/org/example/{file}"): # checking if the required file is in a package
                         temp_path = f"{self.destination}/src/main/java/org/example/{file}"
                     else:
@@ -45,7 +46,7 @@ class TestRunner(ABC):
                 temp_path = f"{self.destination}/{file}"
                 file_path = os.path.join(full_path, file)
                 current_dir = os.getcwd()
-                student["file_path"] = os.path.join(current_dir, file_path)
+                student["file_path"].append(os.path.join(current_dir, file_path))
                 shutil.copyfile(file_path, temp_path)
                 
             if not os.path.exists(temp_path):
@@ -79,7 +80,8 @@ class PythonTestRunner(TestRunner):
                     student["result"] =  f"❌ {res}"
             else:
                 try: 
-                    result = subprocess.run(['python', '-m', 'unittest'], cwd=self.destination, timeout=10, text=True, capture_output=True)
+                    result = subprocess.run(['python3', '-m', 'unittest'], cwd=self.destination, timeout=10, text=True, capture_output=True)
+                    
                     run_info = result.stderr.splitlines()[-3:]
                     res = " ".join(run_info)
                     if run_info[-1] == "OK":

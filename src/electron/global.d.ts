@@ -7,7 +7,7 @@ declare global {
   type Results ={
   name: string,
   result: string,
-  file_path: string
+  file_path: string[]
   }
 
   interface Window  {

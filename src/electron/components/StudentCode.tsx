@@ -12,7 +12,7 @@ const StudentCode: React.FC<ChildProps> = ({currentCode}) =>{
             <h3>Review and ask</h3> <br></br>
             <div id="codeMirror">
             <ReactCodeMirror
-                minWidth="350px"
+                minWidth="450px"
                 theme="dark"
                 value={currentCode}
             />
