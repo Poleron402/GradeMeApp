@@ -6,7 +6,7 @@ PYTHON = python3
 # changing the virtual environment file path if not Unix
 ifeq ($(OS),Windows_NT)
 	PYTHON = python
-	VENV_ENV = ./venv/Scripts/python
+	VENV_ENV = /venv/Scripts/python
 endif
 
 # Builds the app to run on local
