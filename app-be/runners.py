@@ -2,9 +2,9 @@ import os
 import shutil
 import glob
 import re
-import time
-import unittest
+import sys
 import subprocess
+import time
 import xml.etree.ElementTree as ET
 from abc import ABC, abstractmethod
 
@@ -14,7 +14,9 @@ class TestRunner(ABC):
         self.build = build
         self.destination = destination
         self.submission_files_location = submission_files_location
-
+        self.os = "Unix"
+        if sys.platform == "win32":
+            self.os = "Windows"
     @abstractmethod
     def run_tests(self):
         '''The method responsible for the main test running functionality'''
@@ -101,9 +103,7 @@ class PythonTestRunner(TestRunner):
 
 class JavaTestRunner(TestRunner):
     def __init__(self, build, destination, submission_files_location):
-        self.build = build
-        self.destination = destination
-        self.submission_files_location = submission_files_location
+       super().__init__(build, destination, submission_files_location)
 
     ''' checking if the filename is the same as the class name it contains (for java, it has to be)'''
     def check_for_invalid_class_java(self, file):
@@ -150,11 +150,36 @@ class JavaTestRunner(TestRunner):
             if c_flag: 
                 continue
 
-            try:
+            commands = []
+            if self.os == "Windows":
                 if self.build == "gradle":
-                    subprocess.run(["./gradlew", "test"], cwd=self.destination, check=True, timeout=10, capture_output=True, text=True)
-                elif self.build=="mvn":
-                    subprocess.run(["mvn", "test"], cwd=self.destination, check=True, timeout=10, capture_output=True, text=True)
+                    commands = ["cmd.exe", "/c", "gradlew.bat", "test", "--no-daemon"]
+                else:
+                    commands = ["mvn.cmd", "test"]
+            else:
+                if self.build == "gradle":
+                    commands = ["./gradlew", "test"]
+                else:
+                    commands = ["mvn", "test"]
+            proc = subprocess.Popen(
+                commands,
+                cwd=self.destination,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                shell=False,
+                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP  # Windows
+            )
+
+            try:
+                stdout, stderr = proc.communicate(timeout=10)
+            except subprocess.TimeoutExpired:
+                # HARD KILL (Windows)
+                subprocess.run(
+                    ["taskkill", "/PID", str(proc.pid), "/T", "/F"],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL
+                )
             except subprocess.TimeoutExpired as e:
                 outcome += F"⏱️ Build timed out. Check manually."
                 student["result"] = outcome

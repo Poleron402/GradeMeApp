@@ -110,7 +110,7 @@ select{
   border: none;
   color: #3b3b3b;
 }
-.langBuildSelector, #gradeButton{
+.langBuildSelector, .normalButton{
   color: whitesmoke;
 }
 .inLine{

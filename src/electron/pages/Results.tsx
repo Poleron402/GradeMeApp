@@ -50,7 +50,7 @@ const Results = ({data, setShowResults}:{data:Results[], setShowResults:Dispatch
     return (
         <div id="resultsPage">
             <div id="scores">
-            <button onClick={()=>setShowResults(false)}>{`<-- Go back`}</button>
+            <button className="normalButton" onClick={()=>setShowResults(false)}>{`<-- Go back`}</button>
 
             {
                 data && data.map((result:Results)=>(
@@ -62,7 +62,7 @@ const Results = ({data, setShowResults}:{data:Results[], setShowResults:Dispatch
                             const sfile_array = sfile.split("/")
                             return(
                                 <>
-                            <button onClick={()=>{
+                            <button className="normalButton" onClick={()=>{
                             setShowAnalysis(sfile)
                             setPath(sfile)
                             setName(result.name)
@@ -76,7 +76,7 @@ const Results = ({data, setShowResults}:{data:Results[], setShowResults:Dispatch
                     {
                         showAnalysis && showAnalysis !="" &&
                         <>
-                        <button onClick={()=>{
+                        <button className="normalButton" onClick={()=>{
                             
                             setShowAnalysis("")
                             setPath("")
@@ -99,7 +99,7 @@ const Results = ({data, setShowResults}:{data:Results[], setShowResults:Dispatch
                         <h3>Any rubric requirements?</h3> <br></br>
                         <textarea value={rubric} 
                         onChange={e=>setRubric(e.target.value)}></textarea>
-                        <button onClick={getAnalysis}>{rubric.length> 0? "Get Analysis" : "Send Without"}</button>
+                        <button className="normalButton" onClick={getAnalysis}>{rubric.length> 0? "Get Analysis" : "Send Without"}</button>
                         {loading?
                             <img id="duck" src={duck}></img>
                             :
