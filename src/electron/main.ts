@@ -147,14 +147,16 @@ app.on("ready", ()=> {
         })
 
         python.stderr.on('data', (err)=>{
-            event.sender.send('rubric-error', err.toString());
+            event.sender.send('rubric-result', err.toString());
+            console.log(err.toString())
         })
         python.on('close', () => {
         try {
             const data = output;
             event.sender.send('rubric-result', data);
         } catch (err) {
-            event.sender.send('rubric-error', `Failed to parse output: ${err}`);
+            event.sender.send('rubric-result', `Failed to parse output: ${err}`);
+            console.log(err)
         }
         })
     })
