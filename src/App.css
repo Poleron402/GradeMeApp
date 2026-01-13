@@ -308,8 +308,11 @@ table{
 
 
 #rubric{
+  display:flex;
+  flex-direction: column;
+  overflow-wrap: break-word;
   td{
-    padding: 20px;
+    padding: 15px;
     border-bottom: 1px solid #90afa1;
   }
   table{
@@ -323,6 +326,7 @@ table{
   }
 }
 .questionnaire{
+  width: 250px;
   font-size: 15px;
   background-color: #90afa1;
 }

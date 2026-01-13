@@ -20,14 +20,10 @@
   },
   "build": {
     "extraResources": [
-      {
-        "from": "dist-electron/main",
-        "to": "main"
-      },
-      {
-        "from": "dist-electron/ollama_code_analysis",
-        "to": "ollama_code_analysis"
-      }
+      { "from": "app-be/dist/main.exe", "to": "main.exe" }, 
+      { "from": "app-be/dist/ollama_code_analysis.exe", "to": "ollama_code_analysis.exe" },
+      { "from": "app-be/dist/ollama_rubric_generation.exe", "to": "ollama_rubric_generation.exe" }
+
     ]
   },
   "dependencies": {
