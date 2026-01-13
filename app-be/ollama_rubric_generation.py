@@ -1,5 +1,6 @@
 import ollama
 import sys
+from scripts.pull_llama import pullama
 
 points = sys.argv[1]
 about = sys.argv[2]
@@ -25,9 +26,9 @@ be worth the most points, least important - least points and have a separate col
 Be especially precise with point calculations.
 
 '''
-
+model = pullama()
 response = ollama.chat(
-    model='llama3',
+    model=model,
     messages=[{'role': 'system', 'content': system_prompt},{'role': 'user', 'content': prompt}]
 )
 

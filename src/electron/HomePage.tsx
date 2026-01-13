@@ -136,13 +136,16 @@ const Home = () => {
                 <button id="gradeButtonDisabled" disabled>Grade</button>
               </div>
               :
-              <button id="gradeButton" onClick={runScript}>Grade</button>
+              <>
+              <button className="normalButton" onClick={runScript}>Grade</button>
+              {/* <button className="normalButton">Stop Grading</button> */}
+              </>
       }
       {
         !waiting && data&&
         <>
         <button id="resButton" onClick={()=>setShowResults(true)}>Show Results</button>
-         <button title="Download a folder containing submissions sorted by student name" onClick={saveSortedSubmissions}>Download Sorted</button> 
+         <button className="normalButton" title="Download a folder containing submissions sorted by student name" onClick={saveSortedSubmissions}>Download Sorted</button> 
         </>
       }
       {error&&

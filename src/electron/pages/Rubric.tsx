@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { RubricASCII } from "../components/GMASCII"
 import goose from '../../assets/goose.gif'
+import { ErrorPopup } from "../components/Popup";
 
 const Rubric = () =>{
     const [points, setPoints] = useState<string>("0");
@@ -9,24 +10,29 @@ const Rubric = () =>{
     const [unimportant, setUnimportant] = useState<string>("");
     const [waiting, setWaiting] = useState<boolean>(false);
     const [rubric, setRubric] = useState<string>("");
+    const [err, setErr] = useState<string|undefined>()
 // This is a web development project where the student is tasked with building a static website for a business of their choice.
 // Most important aspect of the assignment is the routing of pages. Also important are error handling, having all buttons have a purpose.
 // Least important aspect is responsiveness to mobile view.
     const getRubric = async()=>{
         let tableHTML:string = ""
-        // while (!tableHTML.includes("<table>")) {
+        try {
             tableHTML = await window.electronAPI.getRubric(points, about, important, unimportant)
-        // }
-        console.log(tableHTML)
-        setWaiting(false)
-        setRubric(tableHTML)
+            console.log(tableHTML)
+            setRubric(tableHTML)
+        }catch (err) {
+            console.error(err);
+            setErr("There has been an error calling analyzing function");
+        }finally {
+            setWaiting(false); 
+        }
 
     }
     return(
         <div id="rubricPage">
             <div id="rubric">
                 <RubricASCII/>
-                <h4>Optimize and create fair grading rubric for students by answering the folowing questions:</h4>
+                <h4>Optimize and create fair grading rubric for students by answering<br></br> the folowing questions:</h4>
                 <div id="questionnaire">
                     <table>
                         <tr>
@@ -72,6 +78,9 @@ const Rubric = () =>{
 
             </div>
             <div id="rubricResult">
+                {
+                    err && <ErrorPopup errorText={err} setError={setErr}/>
+                }
                 {
                     waiting&&<img id="duck" src={goose}></img>
                 }

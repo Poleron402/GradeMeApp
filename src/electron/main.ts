@@ -32,7 +32,7 @@ app.on("ready", ()=> {
     }
 
     const mainWindow = new BrowserWindow({
-        width: 1500,
+        width: 1800,
         height: 1000,
         webPreferences:{
             preload: path.join(__dirname, 'preload.js'),
@@ -92,7 +92,7 @@ app.on("ready", ()=> {
         })
 
         python.stderr.on('data', (err)=>{
-            event.sender.send('python-error', err.toString());
+            event.sender.send('codellama-error', err.toString());
         })
         python.on('close', () => {
         try {
@@ -148,13 +148,24 @@ app.on("ready", ()=> {
 
         python.stderr.on('data', (err)=>{
             event.sender.send('rubric-error', err.toString());
+            console.log(err.toString())
         })
-        python.on('close', () => {
+        python.on('error', (err) => {
+            const errorMsg = `Failed to start process: ${err.message}\nPath: ${rubricPath}\nCode: ${err.toString() || 'N/A'}`;
+            console.error(errorMsg);
+            event.sender.send('rubric-error', errorMsg);
+        })
+        python.on('close', (code) => {
         try {
             const data = output;
+            if (code !== 0 && !output) {
+                event.sender.send('rubric-result', `Process exited with code ${code} and no output. Path: ${rubricPath}`);
+                return;
+            }
             event.sender.send('rubric-result', data);
         } catch (err) {
-            event.sender.send('rubric-error', `Failed to parse output: ${err}`);
+            event.sender.send('rubric-result', `Failed to parse output: ${err}`);
+            console.log(err)
         }
         })
     })

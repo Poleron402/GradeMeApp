@@ -1,5 +1,6 @@
 import ollama
 import sys
+from scripts.pull_llama import pullama
 
 submission_folder_path = sys.argv[1]
 rubric = sys.argv[2]
@@ -40,8 +41,10 @@ else:
     Code:
     {code}
 '''   
+    
+model = pullama()
 response =  ollama.chat(
-    model='llama3',
+    model=model,
     messages=[{'role': 'system', 'content': system_prompt},{'role': 'user', 'content': prompt}]
 )
 print(response.message.content)

@@ -32,5 +32,5 @@ submissions/*
 report.html
 .env
 build/
-ollama_code_analysis.spec
-main.spec
+*.spec 
+
