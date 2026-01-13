@@ -156,6 +156,15 @@ class JavaTestRunner(TestRunner):
                     commands = ["cmd.exe", "/c", "gradlew.bat", "test", "--no-daemon"]
                 else:
                     commands = ["mvn.cmd", "test"]
+                proc = subprocess.Popen(
+                    commands,
+                    cwd=self.destination,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    shell=False,
+                    creationflags=subprocess.CREATE_NEW_PROCESS_GROUP  # Windows
+                )    
             else:
                 if self.build == "gradle":
                     commands = ["./gradlew", "test"]
@@ -168,7 +177,6 @@ class JavaTestRunner(TestRunner):
                 stderr=subprocess.PIPE,
                 text=True,
                 shell=False,
-                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP  # Windows
             )
 
             try:

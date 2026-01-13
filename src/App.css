@@ -204,6 +204,7 @@ textarea{
   top: 0;
   left: 0;
   width: 100%;
+  min-width: fit-content;
   height: 100%;
   display: flex;
   justify-content: center;
@@ -211,6 +212,7 @@ textarea{
   z-index: 1000;
 }
 .popupInfo{
+  min-width: fit-content;
   position: relative;
   padding-top: 30px;
   width: 500px;
