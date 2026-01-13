@@ -30,7 +30,7 @@ install-py:
 	$(DEL_COMMAND) venv
 
 build-app:
-# 	$(DEL_COMMAND) dist dist-electron dist-react app-be/venv
+	$(DEL_COMMAND) dist dist-electron dist-react app-be/venv
 	npm run transpile:electron
 	npm run build
 ifeq ($(OS),Windows_NT)
