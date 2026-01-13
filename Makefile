@@ -5,9 +5,9 @@ PYTHON = python3
 DEL_COMMAND = rm -rf
 # changing the virtual environment file path if not Unix
 ifeq ($(OS),Windows_NT)
-	DEL_COMMAND = rmdir /s /q
+# 	DEL_COMMAND = rmdir /s /q
 	PYTHON = python
-	VENV_ENV = /venv/Scripts/python
+	VENV_ENV = venv/Scripts/python
 endif
 
 # Builds the app to run on local
