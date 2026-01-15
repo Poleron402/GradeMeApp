@@ -140,7 +140,7 @@ app.on("ready", ()=> {
     })
 
     ipcMain.on('run-ollama-rubric', (event, {points, about, important, unimportant})=>{
-        const python = isDev()? spawn(pythonPath, [rubricPath, points, about, important, unimportant]):spawn(ollamaPath, [points, about, important, unimportant], {shell:false})
+        const python = isDev()? spawn(pythonPath, [rubricPath, points, about, important, unimportant]):spawn(rubricPath, [points, about, important, unimportant], {shell:false})
         let output = ''
         python.stdout.on("data", (result)=>{
             output += result.toString();
