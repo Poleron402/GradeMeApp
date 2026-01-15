@@ -19,20 +19,31 @@
     "test:e2e": "playwright test"
   },
   "build": {
-    "extraResources": [
-      {
-        "from": "app-be/dist/main.exe",
-        "to": "main.exe"
-      },
-      {
-        "from": "app-be/dist/ollama_code_analysis.exe",
-        "to": "ollama_code_analysis.exe"
-      },
-      {
-        "from": "app-be/dist/ollama_rubric_generation.exe",
-        "to": "ollama_rubric_generation.exe"
-      }
-    ]
+    "extraResources": [],
+
+    "win": {
+      "extraResources": [
+        { "from": "app-be/dist/main.exe", "to": "main.exe" },
+        { "from": "app-be/dist/ollama_code_analysis.exe", "to": "ollama_code_analysis.exe" },
+        { "from": "app-be/dist/ollama_rubric_generation.exe", "to": "ollama_rubric_generation.exe" }
+      ]
+    },
+
+    "mac": {
+      "extraResources": [
+        { "from": "app-be/dist/main", "to": "main" },
+        { "from": "app-be/dist/ollama_code_analysis", "to": "ollama_code_analysis" },
+        { "from": "app-be/dist/ollama_rubric_generation", "to": "ollama_rubric_generation" }
+      ]
+    },
+
+    "linux": {
+      "extraResources": [
+        { "from": "app-be/dist/main", "to": "main" },
+        { "from": "app-be/dist/ollama_code_analysis", "to": "ollama_code_analysis" },
+        { "from": "app-be/dist/ollama_rubric_generation", "to": "ollama_rubric_generation" }
+      ]
+    }
   },
   "dependencies": {
     "@uiw/react-codemirror": "^4.25.4",

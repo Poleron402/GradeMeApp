@@ -4,7 +4,6 @@ import glob
 import re
 import sys
 import subprocess
-import time
 import xml.etree.ElementTree as ET
 from abc import ABC, abstractmethod
 
@@ -14,9 +13,6 @@ class TestRunner(ABC):
         self.build = build
         self.destination = destination
         self.submission_files_location = submission_files_location
-        self.os = "Unix"
-        if sys.platform == "win32":
-            self.os = "Windows"
     @abstractmethod
     def run_tests(self):
         '''The method responsible for the main test running functionality'''
@@ -142,53 +138,51 @@ class JavaTestRunner(TestRunner):
 
     
     def run_tests(self):
-
         outcome_list = []
         for i in os.listdir(self.submission_files_location):
+            is_windows = sys.platform == "win32"
             # start the outcome string that will be printed out and sent to FE
             c_flag, student, outcome = super().move_and_validate_student_files(i)
             if c_flag: 
                 continue
 
             commands = []
-            if self.os == "Windows":
+            popen_kwargs = {
+                "cwd": self.destination,
+                "stdout": subprocess.PIPE,
+                "stderr": subprocess.PIPE,
+                "text": True,
+                "shell": False,
+            }
+            if is_windows:
                 if self.build == "gradle":
                     commands = ["cmd.exe", "/c", "gradlew.bat", "test", "--no-daemon"]
                 else:
                     commands = ["mvn.cmd", "test"]
-                proc = subprocess.Popen(
-                    commands,
-                    cwd=self.destination,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True,
-                    shell=False,
-                    creationflags=subprocess.CREATE_NEW_PROCESS_GROUP  # Windows
-                )    
+
+                flag = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", None)
+                if flag is not None:
+                    popen_kwargs["creationflags"] = flag
             else:
                 if self.build == "gradle":
                     commands = ["./gradlew", "test"]
                 else:
                     commands = ["mvn", "test"]
-            proc = subprocess.Popen(
-                commands,
-                cwd=self.destination,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                shell=False,
-            )
+
+                popen_kwargs["start_new_session"] = True
+            proc = subprocess.Popen(commands, **popen_kwargs)
 
             try:
                 stdout, stderr = proc.communicate(timeout=10)
             except subprocess.TimeoutExpired:
-                # HARD KILL (Windows)
-                subprocess.run(
-                    ["taskkill", "/PID", str(proc.pid), "/T", "/F"],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL
-                )
-            except subprocess.TimeoutExpired as e:
+                if is_windows:
+                    subprocess.run(
+                        ["taskkill", "/PID", str(proc.pid), "/T", "/F"],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL
+                    )
+                else:
+                    proc.kill()
                 outcome += F"⏱️ Build timed out. Check manually."
                 student["result"] = outcome
                 continue
