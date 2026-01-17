@@ -75,8 +75,8 @@ app.on("ready", ()=> {
         try {
             const { data } = JSON.parse(output);
             console.log(data);
-            const reconstruct_path = data[0]['file_path'][0].split("submissions/")
-            __submissions_location = reconstruct_path[0]+"submissions/"
+            const reconstruct_path = data[0]['file_path'][0].split("submissions")
+            __submissions_location = path.join(reconstruct_path[0], "submissions")
             console.log(__submissions_location)
             event.sender.send('python-result', data);
         } catch (err) {

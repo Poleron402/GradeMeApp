@@ -69,7 +69,7 @@ const Rubric = () =>{
                         </tr>
                     </table>
                     <br></br>
-                    <button onClick={()=>{
+                    <button className="normalButton" onClick={()=>{
                         setWaiting(true)
                         getRubric()
                     }}>Suggect a Rubric</button>

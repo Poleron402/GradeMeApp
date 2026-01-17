@@ -107,7 +107,7 @@ const Home = () => {
       }
       {
         language === "python"&&(
-          <select value={build} onChange={e=>{
+          <select className="langBuildSelector" value={build} onChange={e=>{
             setBuild(e.target.value)}}>
             <option value="pytest">pytest</option>
             <option value="unittest">unittest</option>
