@@ -1,21 +1,24 @@
-<img width="220"  alt="GradeMe" src="https://github.com/Poleron402/GradeMeApp/blob/main/src/assets/grademeduck.png" />
+<img width="226" height="210" alt="grademeduck" src="https://github.com/user-attachments/assets/298ab40d-6ec5-4523-8bc1-c37a1963e80c" />
 <br>
-## A java project grading assistant 💯
+
+## Your project grading assistant 💯
 
 Grademe is built to help professors and TAs grade coding projects.<br>
 Currently supported languages are:
 - Java (gradle, mvn)
 - Python (pytest, unittest) 
 
-Support for other - built tools and languages is in the works.
-Grademe uses Ollama to review student code and provide insight into the quality and best practices.
-This tool is not to be used on its own for grading (yet), be sure to double-check suspect results.
+Support for other built tools and languages is in the works.
+Grademe uses Ollama to review student code and provide insight into the quality and best practices. While this might not be the best option, it is cheapest.
+> [!CAUTION]  
+> Be sure to double-check suspect results and report any bugs through issues!
 
-> **_NOTE:_**
-   The app is built with electron, so the download size is going to be higher. If you'd like to just run the script that generates html with results, pull the ```script``` branch.
+> [!NOTE]  
+> The app is built with electron, so the download size is going to be higher. If you'd like to just run the script that generates html with results, pull the ```script``` branch.
    
-> **_NOTE:_** 
-   You can run this application by downloading it from releases, or by cloning, and running `make start-dev` in the terminal. 
+> [!NOTE]
+> You can run this application by downloading it from releases, or by cloning, and running `make start-dev` in the terminal.
+
 ### Steps to use:
 * App:
    1. Download submissions from Canvas
