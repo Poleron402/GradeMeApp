@@ -10,6 +10,10 @@ ifeq ($(OS),Windows_NT)
 	VENV_ENV = venv/Scripts/python
 endif
 
+restore-venv:
+	cd app-be && \
+	$(PYTHON) -m venv venv && \
+	$(VENV_ENV) -m pip install -r requirements.txt
 # Builds the app to run on local
 start-dev:
 	cd app-be && \
@@ -43,9 +47,5 @@ else
 endif
 endif
 
-restore-venv:
-	cd app-be && \
-	$(PYTHON) -m venv venv && \
-	$(VENV_ENV) -m pip install -r requirements.txt
 	
 all: install-py build-app

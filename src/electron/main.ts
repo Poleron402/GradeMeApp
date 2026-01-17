@@ -6,9 +6,9 @@ import { spawn } from 'child_process'
 import * as fs from 'node:fs';
 
 const isWindows = process.platform === "win32";
-
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
+let __submissions_location = ""
 
 app.on("ready", ()=> {
     let pythonPath = ""
@@ -60,7 +60,7 @@ app.on("ready", ()=> {
     })
 
     ipcMain.on('run-python', (event, {folder1, folder2, language, build, is_separated})=>{
-        const python = isDev()? spawn( pythonPath, [scriptPath, folder1 ?? "", folder2 ?? "", language, build, is_separated]):spawn( scriptPath, [folder1 ?? "", folder2 ?? "", language, build??"", is_separated], {shell:false})
+        const python = isDev()? spawn( pythonPath, [scriptPath, folder1 ?? "", folder2 ?? "", language, build, is_separated ,__dirname]):spawn( scriptPath, [folder1 ?? "", folder2 ?? "", language, build??"", is_separated, __dirname], {shell:false})
         let output = ''
         python.stdout.on("data", (result)=>{
             output += result.toString();
@@ -74,7 +74,10 @@ app.on("ready", ()=> {
         python.on('close', () => {
         try {
             const { data } = JSON.parse(output);
-            console.log(data)
+            console.log(data);
+            const reconstruct_path = data[0]['file_path'][0].split("submissions/")
+            __submissions_location = reconstruct_path[0]+"submissions/"
+            console.log(__submissions_location)
             event.sender.send('python-result', data);
         } catch (err) {
             event.sender.send('python-error', `Failed to parse output: ${err}`);
@@ -104,15 +107,14 @@ app.on("ready", ()=> {
         })
     })
 
-    ipcMain.handle("dialog:downloadFolder", async (event) =>{
-        const __subdirname = path.join(__dirname, '..', 'submissions')
+    ipcMain.handle("dialog:downloadFolder", async (event) =>{ 
         const {canceled, filePaths} = await dialog.showOpenDialog({
             title: "Save Submissions",
             properties: ['openDirectory', 'createDirectory']
         })
         if (!canceled && filePaths){
             try{
-                await fs.cp(__subdirname, `${filePaths[0]}/submissions-${Date.now()}`, {recursive: true}, (err)=>{
+                await fs.cp(__submissions_location, `${filePaths[0]}/submissions-${Date.now()}`, {recursive: true}, (err)=>{
                     if (err) throw err
                 })
             }catch(err){
@@ -171,15 +173,15 @@ app.on("ready", ()=> {
     })
 })
 
-
-
-app.on('will-quit', async(e)=>{
+app.on('will-quit', (e)=>{
     e.preventDefault()
-    const __subdirname = path.join(__dirname, '..', 'submissions')
-    if (fs.existsSync(__subdirname) === true){
-
-        await fs.rm(__subdirname, { recursive: true },  (err)=>{
-            if (err) throw err
-        })
-    }   
+    if (fs.existsSync(__submissions_location)){
+        try{
+            fs.rm(__submissions_location, { recursive: true, force: true }, (err)=>{
+                console.error('Failed to delete log file:', err);
+            });
+        } catch (error) {
+            console.error('Failed to delete log file:', error);
+        }
+    }  
 })

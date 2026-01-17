@@ -12,6 +12,7 @@ folder_path = sys.argv[2]
 language = sys.argv[3]
 build = sys.argv[4]
 is_sorted = sys.argv[5]
+location_folder = sys.argv[6]
 
 def run():
     results = None
@@ -20,9 +21,10 @@ def run():
         "java": JavaTestRunner,
         "python": PythonTestRunner,
     }
-    with tempfile.TemporaryDirectory(dir='.') as output_dir:
-        shutil.copytree(folder_path, output_dir, dirs_exist_ok=True)
+    output_sub_dir = ""
+    with tempfile.TemporaryDirectory(dir=".") as output_dir:
         # copy the submissions folder into local environment
+        shutil.copytree(folder_path, output_dir, dirs_exist_ok=True)
         output_sub_dir = os.path.abspath("submissions")
         if os.path.exists(f'{output_sub_dir}'):
             shutil.rmtree(output_sub_dir)
@@ -35,11 +37,12 @@ def run():
             my_sub.separate_by_folders()   
         
         runner = factories.get(language)(build, output_dir, output_sub_dir)
-        results = runner.run_tests()
+        results =runner.run_tests()
         
     return results
 
-data = run() 
+data = run()
 results = sorted(data, key=lambda d: d["name"])
-print(json.dumps({"data": results}))
+res = {"data": results}
+print(json.dumps(res))
 sys.stdout.flush()
