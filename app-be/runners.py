@@ -37,20 +37,19 @@ class TestRunner(ABC):
                     if os.path.exists(f"{self.destination}/src/main/java/org/example/{file}"): # checking if the required file is in a package
                         temp_path = f"{self.destination}/src/main/java/org/example/{file}"
                     else:
-                        temp_path = f"{self.destination}/src/main/java/{file}"
-                    shutil.copyfile(file_path, temp_path)
-
+                        temp_path = f"{self.destination}/src/main/java/{file}"         
             elif self.__class__.__name__== "PythonTestRunner":
                 temp_path = f"{self.destination}/{file}"
                 file_path = os.path.join(full_path, file)
                 current_dir = os.getcwd()
                 student["file_path"].append(os.path.join(current_dir, file_path))
-                shutil.copyfile(file_path, temp_path)
                 
             if not os.path.exists(temp_path):
                 continue_flag = True
-                outcome += "❌ Errors occured running stuident's submission. Check manually."
+                outcome += "❌ Errors occured running stuident's submission. Most likely culprit - filename mismatch."
                 student["result"] = outcome
+            else:
+                shutil.copyfile(file_path, temp_path)
         return continue_flag, student, outcome
     
 # Python runner 
@@ -60,6 +59,7 @@ class PythonTestRunner(TestRunner):
         for i in os.listdir(self.submission_files_location):
             c_flag, student, outcome = super().move_and_validate_student_files(i)
             if c_flag: 
+                outcome_list.append(student)
                 continue
             if self.build == "pytest":
                 try: 
@@ -143,7 +143,8 @@ class JavaTestRunner(TestRunner):
             is_windows = sys.platform == "win32"
             # start the outcome string that will be printed out and sent to FE
             c_flag, student, outcome = super().move_and_validate_student_files(i)
-            if c_flag: 
+            if c_flag:
+                outcome_list.append(student) 
                 continue
 
             commands = []
