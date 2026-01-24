@@ -1,6 +1,9 @@
 <img width="226" height="210" alt="grademeduck" src="https://github.com/user-attachments/assets/298ab40d-6ec5-4523-8bc1-c37a1963e80c" />
 <br>
 
+[View on Web](https://grademesite.vercel.app/)
+<br>
+
 ## Your project grading assistant 💯
 
 Grademe is built to help professors and TAs grade coding projects.<br>
