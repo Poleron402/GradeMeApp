@@ -123,7 +123,23 @@ app.on("ready", ()=> {
         }
         return filePaths[0]
     })
-
+    ipcMain.handle("dialog:downloadJSON", async (event, data:string) =>{ 
+        const {canceled, filePaths} = await dialog.showOpenDialog({
+            title: "Save Submissions (JSON)",
+            properties: ['openDirectory', 'createDirectory']
+        })
+        if (!canceled && filePaths){
+            try{
+                await fs.writeFile(`${filePaths}/test_results-${Date.now()}.json`, data,  (err) => {
+                    if (err) throw err;
+                    console.log('The file has been saved!');
+                })
+            }catch(err){
+                event.sender.send("Write file error", `Failed to save file ${err}`)
+            }
+        }
+        return filePaths[0]
+    })
     ipcMain.handle('fileReader', async(_, path)=>{
         if (!path) {
             console.error("NO PATH RECEIVED")

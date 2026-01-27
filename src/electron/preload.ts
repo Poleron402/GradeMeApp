@@ -15,6 +15,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.send('run-codellama', { path, rubric });
     }),
     downloadFolder: ()=>ipcRenderer.invoke('dialog:downloadFolder'),
+    downloadJSON: (data: string)=>ipcRenderer.invoke('dialog:downloadJSON', data),
+
     getFileContent: (filePath: string)=>ipcRenderer.invoke('fileReader', filePath),
     getRubric: (points: string, about: string, important: string, unimportant: string)=>new Promise((resolve, reject) => {
       ipcRenderer.once('rubric-result', (_event, data) => resolve(data));

@@ -38,6 +38,13 @@ const Home = () => {
       alert(`Issues saving a folder ${err}`)
     }
   }
+  const saveJson = async() =>{
+    try{
+      await window.electronAPI.downloadJSON(JSON.stringify(data));
+    }catch (err){
+      alert(`Issues saving a folder ${err}`)
+    }
+  }
   const runScript = async()=>{
     setWaiting(true)
     setError("")
@@ -130,9 +137,8 @@ const Home = () => {
           </>
       }
       {
-            !folder1 || !folder2  ?
+            (!folder1 || !folder2 ) ?
               <div>
-                
                 <button id="gradeButtonDisabled" disabled>Grade</button>
               </div>
               :
@@ -145,7 +151,9 @@ const Home = () => {
         !waiting && data&&
         <>
         <button id="resButton" onClick={()=>setShowResults(true)}>Show Results</button>
-         <button className="normalButton" title="Download a folder containing submissions sorted by student name" onClick={saveSortedSubmissions}>Download Sorted</button> 
+        <button className="normalButton" title="Download a folder containing submissions sorted by student name" onClick={saveSortedSubmissions}>Download Sorted</button> 
+        &nbsp;<button className="normalButton" title="Download a folder containing submissions sorted by student name" onClick={saveJson}>Download JSON</button> 
+
         </>
       }
       {error&&
