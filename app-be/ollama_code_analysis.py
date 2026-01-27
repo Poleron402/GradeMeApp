@@ -21,7 +21,9 @@ in a form of an unordered list (bullet points). Use the following format for you
 -- WHAT IMPROVEMENTS CAN STUDENT DO --\n
 * Provide the  improvements, format the answer like so:
 * You can even include typo and grammar suggestions, if there is nothing to improve
-* If there is truly nothing to improve or work on, give a congratulatory message and a cute emoji.
+* If there is truly nothing to improve or work on, give a congratulatory message and an emoji.
+-- YOUR RUBRIC --\n
+* Answer this request: {rubric}
  '''
 
 if len(rubric)>0:
