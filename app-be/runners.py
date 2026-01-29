@@ -16,6 +16,41 @@ class TestRunner(ABC):
     @abstractmethod
     def run_tests(self):
         '''The method responsible for the main test running functionality'''
+    def parse_to_nums(self, build, result):
+        match build:
+            case "pytest":
+                failures = 0
+                success = 0
+                failed = re.search(r"\d+ failed", result)
+                passed = re.search(r"\d+ passed", result)
+                if failed:
+                    failed = failed.group()
+                    find_number = re.search(r"\d+", failed)
+                    failures += int(find_number.group())
+                if passed:
+                    passed = passed.group()
+                    find_number = re.search(r"\d+", passed)
+                    success += int(int(find_number.group()))
+                return failures, success, failures+success
+            case "unittest":
+                total = 0
+                failures = 0
+                failed = re.search(r"failures=\d+", result)
+                errors = re.search(r"errors=\d+", result)
+                ran = re.search(r"Ran \d+ test", result)
+                if failed:
+                    failed = failed.group()
+                    find_number = re.search(r"\d+", failed)
+                    failures += int(find_number.group())
+                if errors:
+                    errors = errors.group()
+                    find_number = re.search(r"\d+", errors)
+                    failures += int(find_number.group())
+                if ran:
+                    ran = ran.group()
+                    find_number = re.search(r"\d+", ran)
+                    total += int(find_number.group())
+                return failures, total-failures, total
 
     def move_and_validate_student_files(self, student_name):
         outcome = ""
@@ -65,6 +100,11 @@ class PythonTestRunner(TestRunner):
                 try: 
                     result = subprocess.run(['pytest', '--tb=short'], cwd=self.destination, timeout=10, text=True, capture_output=True)
                     res = result.stdout.splitlines()[-1].replace('=', '')
+                    failed, passed, total = self.parse_to_nums("pytest", res)
+                    student["failed"] = failed
+                    student["passed"] = passed
+                    student["total"] = total
+
                 except subprocess.TimeoutExpired as e:
                     outcome += F"⏱️ Build timed out. Check manually."
                     student["result"] = outcome
@@ -82,6 +122,10 @@ class PythonTestRunner(TestRunner):
                     
                     run_info = result.stderr.splitlines()[-3:]
                     res = " ".join(run_info)
+                    failed, passed, total = self.parse_to_nums("unittest", res)
+                    student["failed"] = failed
+                    student["passed"] = passed
+                    student["total"] = total
                     if run_info[-1] == "OK":
                         student["result"] = f"✅ {res}"
                     else:
@@ -117,7 +161,7 @@ class JavaTestRunner(TestRunner):
     ''' Since we are not printing out gradle test output but rather parsing the generated XML (to avoid any syntactical errors while parsing),
         We might need that method here 
     '''
-    def getXMLGradle(self, outcome):
+    def getXMLGradle(self, outcome, student):
         results_path = os.path.join(self.destination, "build", "test-results", "test", "TEST-*.xml")
         result_files = glob.glob(results_path) # makes the TEST-*.xml work
         if result_files:
@@ -126,16 +170,21 @@ class JavaTestRunner(TestRunner):
             all_tests = int(root.attrib.get('tests'))
             failed = int(root.attrib.get('skipped'))+int(root.attrib.get('failures'))+int(root.attrib.get('errors'))
             passed = all_tests-failed
-            if "❌" in outcome:
+            if "❌" in outcome or failed>0:
                 if passed == all_tests:
                     outcome += "Something went wrong; Check manually"
                 else:
                     outcome += f"{passed}/{all_tests}"
             else:
                 outcome += f"✅ {passed}/{all_tests}"
-
+            student["failed"] = failed
+            student["passed"] = passed
+            student["total"] = all_tests
+        else:
+            student["failed"] = 0
+            student["passed"] = 0
+            student["total"] = 0
         return outcome
-
     
     def run_tests(self):
         outcome_list = []
@@ -190,7 +239,7 @@ class JavaTestRunner(TestRunner):
             except subprocess.CalledProcessError as e:
                 outcome += "❌ "
             if self.build == 'gradle':
-                outcome = self.getXMLGradle(outcome)
+                outcome = self.getXMLGradle(outcome, student)
             elif self.build == 'mvn':
                 results_path = os.path.join(self.destination, "target", "surefire-reports", "*Test.txt")
                 matched_path = glob.glob(results_path)
@@ -203,14 +252,20 @@ class JavaTestRunner(TestRunner):
                                     result_array = re.split(r": |, ", line)
                                     total = int(result_array[result_array.index("Tests run")+1])
                                     failed = int(result_array[result_array.index("Failures")+1])
-                                    if total-failed == 10:
+                                    if total-failed == total:
                                         if "❌" in outcome:
                                             outcome += f"Something went wrong. Check manually"
                                         else:
                                             outcome += f"✅ {total-failed}/{total}"
                                     else:
                                         outcome += f"{total-failed}/{total}"
-                
+                                    student["failed"] = failed
+                                    student["passed"] = total-failed
+                                    student["total"] = total
+                                else:
+                                    student["failed"] = 0
+                                    student["passed"] = 0
+                                    student["total"] = 0
             student["result"] = outcome
             outcome_list.append(student)
         
