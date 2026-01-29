@@ -7,6 +7,9 @@ declare global {
   type Results ={
   name: string,
   result: string,
+  failed: number,
+  passed: number,
+  total: number,
   file_path: string[]
   }
 
